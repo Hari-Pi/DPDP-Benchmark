@@ -1,0 +1,272 @@
+FAQs on Data 
+Protection Board 
+ 
+ 1  
+ 
+FREQUENTLY ASKED QUESTIONS: DIGITAL PERSONAL DATA 
+PROTECTION FRAMEWORK [DPDP ACT, 2023 AND DPDP RULES 
+2025] 
+THEME: DATA PROTECTION BOARD OF INDIA 
+ 
+Question Answer Relevant 
+Provision – 
+DPDP Act, 
+2023 
+Relevant 
+Provision – 
+DPDP 
+Rules, 2025 
+What is the Data 
+Protection Board of 
+India? 
+The Data Protection Board (DPB) of 
+India is a statutory body corporate 
+established by the Central 
+Government to enforce the DPDP Act 
+and adjudicate non-compliance. 
+Section 
+2(c) 
+- 
+What is the legal 
+status of the Board? 
+The Board has perpetual succession, 
+a common seal, and the power to 
+acquire property and to sue or be 
+sued. 
+Section 18 - 
+How is the Board 
+composed? 
+The Board consists of a Chairperson 
+and such number of Members as may 
+be notified by the Central 
+Government. 
+Section 
+19(1) 
+- 
+What qualifications 
+are required for the 
+Chairperson and 
+Members? 
+Members must be persons of ability, 
+integrity, and standing with special 
+knowledge or experience in data 
+governance, law, administration, ICT, 
+the digital economy, regulation or 
+techno-regulation, or in any other 
+field which in the opinion of the 
+Central Government may be useful to 
+the Board, and at least one among 
+them shall be an expert in the field of 
+law. 
+Section 
+19(3) 
+- 
+How are the 
+Chairperson and 
+Members 
+appointed? 
+The Chairperson and other Members 
+shall be appointed by the Central 
+Government in such manner as may 
+be prescribed. 
+Section 
+19(2) 
+Rule 17 
+
+ 
+ FAQs on Data 
+Protection Board 
+ 
+ 2  
+ 
+Who selects the 
+Chairperson of the 
+Board? 
+A Search-cum-Selection Committee 
+recommends names to the Central 
+Government. This committee is 
+chaired by the Cabinet Secretary and 
+includes: 
+- Secretary, Department of 
+Legal Affairs 
+- Secretary, Ministry of 
+Electronics and IT (MeitY) 
+- Two subject-matter experts 
+Section 
+19(2) 
+Rule 17 
+Who selects the 
+other Members of 
+the Board? 
+A separate Search-cum-Selection 
+Committee recommends names for 
+Members (other than the 
+Chairperson). This committee is 
+chaired by the MeitY Secretary and 
+includes: 
+- Secretary, Department of 
+Legal Affairs 
+- Two subject-matter experts 
+Section 
+19(2) 
+Rule 17 
+What is the term of 
+office of the 
+Chairperson and 
+Members? 
+The Chairperson and Members hold 
+office for two years and are eligible for 
+reappointment. 
+Section 
+20(2) 
+- 
+How does the Board 
+function as a “digital 
+office”? 
+The Board is designed to function 
+digitally, enabling online filing, 
+hearings, inquiries, summon and 
+enforce the attendance of any 
+person, and issuance of orders and 
+may adopt techno-legal measures to 
+conduct proceedings in a manner 
+that does not require physical 
+presence of any individual. 
+Section 
+28(1), 
+Section 
+2(m) 
+Rule 20 
+What are the 
+powers and 
+functions of the 
+Board? 
+The DPB is empowered to: 
+• Direct urgent remedial or 
+mitigation measures and 
+impose penalties in cases of 
+personal data breaches. 
+• Inquire into complaints from 
+Data Principals regarding data 
+breaches, non-compliance by 
+Data Fiduciaries, or violations 
+of Data Principal rights, 
+Section 27 - 
+
+ 
+ FAQs on Data 
+Protection Board 
+ 
+ 3  
+ 
+including references from 
+governments or courts. 
+• Examine breaches by Consent 
+Managers, including violations 
+of registration conditions, and 
+impose penalties. 
+• Inquire into breaches by 
+intermediaries upon reference 
+from the Central Government. 
+For effective discharge of its 
+functions, the Board may issue 
+binding directions after giving the 
+concerned party an opportunity to be 
+heard. The Board may also modify, 
+suspend, withdraw, or cancel its 
+directions upon representation or 
+government reference. 
+ 
+What is the timeline 
+for completion of an 
+inquiry? 
+Inquiries must be completed within 
+six months, from the date of receipt of 
+the intimation, complaint, extendable 
+by up to three months at a time with 
+reasons recorded in writing. 
+- Rule 19(9) 
+Can the Board 
+impose monetary 
+penalties? 
+Yes. The Board may impose monetary 
+penalties as prescribed in the 
+Schedule to the Act. If an inquiry 
+concludes that a breach is significant, 
+the Board can impose monetary 
+penalties. These range from up to 
+₹10,000 for Data Principal duties to 
+₹250 crore for a Data Fiduciary’s 
+failure to take reasonable security 
+safeguards. 
+Section 33  Schedule 
+What factors are 
+considered while 
+imposing penalties? 
+Nature, gravity, duration of breach, 
+type of personal data affected, 
+recurrence, and financial gain or loss 
+avoided. 
+Section 
+33(2) 
+- 
+Can the Board take 
+action against 
+Consent Managers? 
+Yes. The Board handles the 
+registration of Consent Managers. If a 
+Consent Manager fails to adhere to its 
+obligations, the Board may, after a 
+hearing, suspend or cancel its 
+Section 
+6(9), 
+Section 
+27(1)(c) 
+Rule 4(4) 
+
+ 
+ FAQs on Data 
+Protection Board 
+ 
+ 4  
+ 
+registration and issue directions to 
+protect Data Principals. 
+How can a 
+complaint be filed 
+before the Board? 
+Complaints must be filed digitally 
+after exhaustion of the Data 
+Fiduciary’s grievance redressal 
+mechanism. 
+Section 27 Rule 9 
+Which authority 
+hears appeals 
+against Board 
+orders? 
+The Telecom Disputes Settlement 
+and Appellate Tribunal (TDSAT). 
+Section 
+2(a), 
+Section 29 
+- 
+Who can appeal 
+against a decision 
+made by the Board? 
+Any person aggrieved by an order or 
+direction of the Board may file an 
+appeal with the Appellate Tribunal 
+(TDSAT). Such appeals must be filed 
+in digital form. 
+Section 
+29(1) 
+Rule 21, Rule 
+22 
+What is the time 
+limit for filing an 
+appeal against a 
+DPB order? 
+An appeal must be filed within 60 
+days from the date of receipt of the 
+order or direction of the DPB. 
+Section 29 -

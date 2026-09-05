@@ -1,0 +1,58 @@
+GOVERNMENT OF INDIA 
+MINISTRY OF ELECTRONICS AND INFORMATION TECHNOLOGY 
+LOK SABHA 
+UNSTARRED QUESTION NO. 3960 
+TO BE ANSWERED ON: 12.08.2026 
+ 
+APPOINTMENT OF CHAIRPERSON AND MEMBERS OF 
+ DATA PROTECTION BOARD OF INDIA 
+ 
+3960.   SHRI MANISH TEWARI: 
+ 
+Will the Minister of ELECTRONICS AND INFORMATION TECHNOLOGY be pleased to 
+state: 
+ 
+(a) whether the Chairperson and Members of the Data Protection Board of India have been 
+appointed, if so, the details thereof and if not, the reasons for the delay considering that the 
+Board was established in November 2025 while applications for the posts of Chairperson and 
+four Members were invited only in May 2026 along with the time by which the appointments 
+are likely to be made; 
+(b) whether any Consent Managers have been registered under the Act and if so, the details 
+thereof, and if not, the reasons for the delay in operationalising the registration framework 
+and the timeline fixed therefor; 
+(c) the number of personal data breach intimations and complaints received by the 
+Government since November 2025 along with the action taken thereon; and 
+(d) the details of steps taken by the Government to create awareness among citizens about 
+their rights as Data Principals particularly among women, senior citizens, rural residents and 
+persons with disabilities? 
+  
+ANSWER 
+ 
+MINISTER OF STATE FOR ELECTRONICS AND INFORMATION TECHNOLOGY 
+(SHRI JITIN PRASADA) 
+ 
+(a)   to (d):   The Digital Personal Data Protection Act, 2023 (“Act”) provides for the processing 
+of digital personal data in a manner that recognises both the rights of the individual to protect 
+their personal data and the need to process such personal data for lawful purposes. 
+ 
+The Act, and the Digital Personal Data Protection Rules, 2025 (“Rules”) notified on 13 
+November, 2025 provide a timeline for phased implementation of its provisions over an 
+eighteen-month transition period, including the establishment of the Data Protectio n Board 
+(“Board”). The Rules specify the following implementation timelines: 
+●     Phase 1: Establishment and operationalisation of the Data Protection Board of India 
+○    As notified, the Board is composed of Chairperson and four Members, who 
+are to be appointed through a Search -cum-Selection Committee. The 
+advertisement for recruitment to the posts of Chairperson and Members was 
+published in the Employment News on 6 June 2026. 
+○     The Board has to function in a digital manner. 
+●      Phase 2 (within one year): Registration and functioning of Consent Managers 
+●  Phase 3 (within eighteen months): Compliance obligations for Data Fiduciaries 
+including data principal rights, security safeguards and breach notification. 
+
+ 
+The Government has taken various measures to promote widespread awareness and adoption 
+of the Digital Personal Data Protection (DPDP) Act by educating citizens on their rights & 
+duties and capacity-building initiatives, including workshops, conferences, expert sessions, and 
+digital outreach campaigns. 
+ 
+*******

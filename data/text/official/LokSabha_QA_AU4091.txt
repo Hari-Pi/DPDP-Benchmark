@@ -1,0 +1,95 @@
+GOVERNMENT OF INDIA 
+MINISTRY OF ELECTRONICS AND INFORMATION TECHNOLOGY 
+LOK SABHA 
+UNSTARRED QUESTION NO. 4091 
+TO BE ANSWERED ON: 12.08.2026 
+ 
+RURAL AWARENESS PROGRAMME ON DATA PRINCIPAL 
+RIGHTS 
+ 
+4091.   SHRI KARAN BHUSHAN SINGH: 
+ 
+Will the Minister of ELECTRONICS AND INFORMATION TECHNOLOGY be pleased to 
+state: 
+ 
+(a) the status of phased implementation of the Digital Personal Data Protection Rules, 2025 
+including functioning of the Data Protection Board of India since 13th November, 2025 and 
+preparedness for Consent Manager registration from 13th November, 2026; 
+(b) whether Village Level Entrepreneurs operating the over 5.8 lakh Common Service 
+Centres (CSCs) who process citizens' Aadhaar, banking and health data daily, qualify as 
+"Data Fiduciary" under the Act and their compliance obligations, if any; 
+(c)  whether a rural awareness programme on data principal rights — consent, correction, 
+erasure and grievance redressal — is proposed through the CSC network particularly in 
+aspirational districts such as Gonda; and 
+(d) the vernacular/simplified grievance redressal mechanism, if any, being designed for rural 
+citizens with limited digital literacy as most CSC users in districts like Gonda lack access to 
+formal written consent processes? 
+  
+ANSWER 
+ 
+MINISTER OF STATE FOR ELECTRONICS AND INFORMATION TECHNOLOGY 
+(SHRI JITIN PRASADA) 
+ 
+(a)   to (d):  The Digital Personal Data Protection Act, 2023 (“Act”) provides for the processing 
+of digital personal data in a manner that recognises both the rights of the individual to protect 
+their personal data and the need to process such personal data for lawful purposes. 
+ 
+The Act, and the Digital Personal Data Protection Rules, 2025 (“Rules”) notified on 13 
+November, 2025 provide a timeline for phased implementation of its provisions over an 
+eighteen-month transition period, including the establishment of the Data Protectio n Board 
+(“Board”). The Rules specify the following implementation timelines: 
+●     Phase 1: Establishment and operationalisation of the Data Protection Board of India 
+○    As notified, the Board is composed of a Chairperson  and four Members, 
+who are to be appointed through a Search -cum-Selection Committee. The 
+advertisement for recruitment to the posts of Chairperson and Members was 
+published in the Employment News on 6 June 2026. 
+○      The Board has to function in a digital manner. 
+●      Phase 2 (within one year): Registration and functioning of Consent Managers 
+●  Phase 3 (within eighteen months): Compliance obligations for Data Fiduciaries 
+including data principal rights, security safeguards and breach notification. 
+ 
+
+Under the DPDP Act, a Data Fiduciary is any person who alone or in conjunction with others 
+determines the purpose and means of processing personal data. A Data Fiduciary, the 
+applicable obligations under the Act and Rules would include, when the relevant p rovisions 
+come into force: 
+●  having a valid contract with the Data Processors 
+●  providing valid notices accessible in 22 Indian languages and obtaining consent 
+where required; 
+●  implementing reasonable security safeguards; 
+●  responding to Data Principal requests; 
+●  facilitating correction and erasure where applicable; 
+●   establishing an effective grievance redressal mechanism and prominently publishing 
+on its website or application the period, not exceeding ninety days, within which 
+grievances shall be addressed 
+●  reporting personal data breaches; and 
+●  complying with other obligations prescribed under the Act and Rules. 
+ 
+Key obligations of a data processor (an entity that processes personal data on behalf of a 
+data fiduciary): 
+● Process data only on behalf of the Data Fiduciary 
+● Ensure reasonable security safeguards 
+● Comply with contractual and legal requirements specified in the processing contract 
+with the Data Fiduciary and support compliance with the DPDP Act 
+ 
+CSC e-Governance Services India Limited provides assisted access to digital services through 
+its VLEs, who support citizens in understanding and availing various Government services. 
+CSC VLE is not authorised to collect and store any data of citizens durin g the course of 
+providing services. Citizens can also access grievance redressal support through the CSC 
+Helpdesk (14599), Digital Seva Portal and the State/District CSC network. 
+ 
+Awareness programme: 
+Capacity building and public awareness form integral components of the Government's 
+strategy for promoting data protection and cyber security. Training programmes are conducted 
+across sectors to strengthen IT security capabilities, while public awareness i nitiatives—
+including Cyber Security Awareness Month, Safer Internet Day, workshops, conferences, 
+expert sessions, and digital outreach campaigns—are undertaken to educate citizens on online 
+safety, secure digital transactions, their rights and responsibili ties under the DPDP Act, and 
+responsible use of digital services. 
+ 
+Through the combined implementation of legal, technical, institutional, and awareness 
+measures, the Government is committed to fostering a secure, resilient, and trustworthy digital 
+ecosystem that safeguards the interests of citizens, businesses, and criti cal national 
+infrastructure. 
+ 
+******

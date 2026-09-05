@@ -1,0 +1,134 @@
+[
+  {
+    "file": "DPDP_Act_2023.pdf",
+    "url": "https://www.meity.gov.in/static/uploads/2024/06/2bf1f0e9f04e6fb4f8fef35e82c42aa5.pdf",
+    "tier": 1,
+    "gazette_ref": "Act 22 of 2023",
+    "published": "2023-08-11",
+    "note": "in data/raw/",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "4deb23981d3010c8225a2ff6149e7243dc2268455b299e283afebdd7b72a7d15"
+  },
+  {
+    "file": "DPDP_Rules_2025_English.pdf",
+    "url": "https://egazette.gov.in/WriteReadData/2025/267650.pdf",
+    "tier": 1,
+    "gazette_ref": "G.S.R. 846(E), CG-DL-E-14112025-267650",
+    "published": "2025-11-13",
+    "note": "in data/raw/",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "eabc7d05e013144615d78ddc0e8b9c9aac1920e814f4fad38ce6560951f5aa08"
+  },
+  {
+    "file": "official/Commencement_Notification_GSR_843E.pdf",
+    "url": "https://egazette.gov.in/WriteReadData/2025/267647.pdf",
+    "tier": 1,
+    "gazette_ref": "G.S.R. 843(E)",
+    "published": "2025-11-13",
+    "note": "3-phase commencement of the Act",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "6df25cd8c76ac8eb18cae81835d51d51128ffbf2ed13262843395efddf0998e5"
+  },
+  {
+    "file": "official/Board_Establishment_GSR_844E.pdf",
+    "url": "https://egazette.gov.in/WriteReadData/2025/267648.pdf",
+    "tier": 1,
+    "gazette_ref": "G.S.R. 844(E)",
+    "published": "2025-11-13",
+    "note": "establishes the Board under s. 18",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "5cc76d1fedf9f93655ef92a297dd7e590a78a145ba0d25a40fe2190faecae65b"
+  },
+  {
+    "file": "official/Board_Members_GSR_845E.pdf",
+    "url": "https://egazette.gov.in/WriteReadData/2025/267649.pdf",
+    "tier": 1,
+    "gazette_ref": "G.S.R. 845(E)",
+    "published": "2025-11-13",
+    "note": "Board composition under s. 19(1)",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "812fe0ce802fe78f0bcbb0c032f74a5110ce23417e9b78889d21a6b7b77ba6a7"
+  },
+  {
+    "file": "official/Corrigendum_GSR_892E.pdf",
+    "url": "https://egazette.gov.in/WriteReadData/2025/268455.pdf",
+    "tier": 1,
+    "gazette_ref": "G.S.R. 892(E)",
+    "published": "2025-12-10",
+    "note": "7 textual corrections to the Rules",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "8f8d9526b511801889f8ae022b6d7c5db449283e90fe32792e5896314b32f994"
+  },
+  {
+    "file": "official/Draft_Rules_Gazette_GSR_02E.pdf",
+    "url": "https://egazette.gov.in/WriteReadData/2025/259889.pdf",
+    "tier": 1,
+    "gazette_ref": "G.S.R. 02(E), CG-DL-E-03012025-259889",
+    "published": "2025-01-03",
+    "note": "draft rules for public consultation",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "5642d2332ee4893fb28291e8b79a016299d5e51cfdc2877e69a12d6facdb0395"
+  },
+  {
+    "file": "official/Draft_Rules_PIB_Overview.pdf",
+    "url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2025/jan/doc202515481101.pdf",
+    "tier": 1,
+    "gazette_ref": "PIB doc202515481101",
+    "published": "2025-01-05",
+    "note": "PIB overview of draft rules",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "ddc99789d59a42f051e33b022d051b36ca2b4df97ecff2d8462767facf5db8ba"
+  },
+  {
+    "file": "official/Summary_Submissions_Draft_Rules.pdf",
+    "url": "https://www.meity.gov.in/static/uploads/2026/01/a49c50414777afc2af0b8d59dafacd60.pdf",
+    "tier": 1,
+    "gazette_ref": "MeitY summary",
+    "published": "2026-01-14",
+    "note": "summary of 6,951 submissions on the draft rules",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "f192c2d6e94510a658917a01f41896b3810dd409eaa6f5b996240d8efd568d7f"
+  },
+  {
+    "file": "official/LokSabha_QA_AU3960.pdf",
+    "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/188/AU3960_GyWSTk.pdf",
+    "tier": 1,
+    "gazette_ref": "LS US Q. 3960",
+    "published": "2026-08-12",
+    "note": "Board appointment status",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "e2ab3f3c687f934807564bcb05e58e9288e2bf39d192537af9287fcce55e69aa"
+  },
+  {
+    "file": "official/LokSabha_QA_AU4091.pdf",
+    "url": "https://sansad.in/getFile/lsapps/loksabhaquestions/annex/188/AU4091_ajtbM6.pdf",
+    "tier": 1,
+    "gazette_ref": "LS US Q. 4091",
+    "published": "2026-08-12",
+    "note": "implementation status, CSC/VLEs",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "c65426ed9837a3a227961b9928e4375f3a122dd615cc78165876409c372382fa"
+  },
+  {
+    "file": "official/DSCI_FAQ_DPDP_Framework.pdf",
+    "url": "https://www.dsci.in/files/content/documents/2026/faq-on-data-protection-board.pdf",
+    "tier": 2,
+    "gazette_ref": "DSCI FAQ",
+    "published": "2026",
+    "note": "industry-body FAQ on the Board",
+    "status": "ok",
+    "fetched": "2026-09-05",
+    "sha256": "d134a145ec60cadfb51157f89ae003d98ea87dcff17faf60feddc9d2a6247724"
+  }
+]

@@ -1,0 +1,247 @@
+[
+  {
+    "id": "penalty-security-failure",
+    "retrieval_hit": false,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 6",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 6",
+      "Lok Sabha Q&A AU4091 (12 Aug 2026): implementation status | QA AU4091",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 12",
+      "DPDP Rules 2025 | r. 13",
+      "DPDP Rules 2025 | r. 8",
+      "DPDP Act 2023 | s. 8",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 37",
+      "DPDP Act 2023 | s. 8"
+    ],
+    "answer_contains": [
+      null
+    ],
+    "answer_ok": false,
+    "answer": "The DPDP Act 2023 does not specify the maximum monetary penalty for a Data Fiduciary's failure to take reasonable security safeguards. The relevant section, DPDP Act 2023, s. 8(5), requires a Data Fiduciary to take reasonable security safeguards but does not detail the penalties for non-compliance. For specific penalty details, one would need to refer to other sections of the Act or the Rules, but such information is not provided in the given context.\n\nFor the maximum monetary penalty, you would need to consult the sections of the Act or Rules that deal with penalties, such as DPDP Act 2023, s. 37, which outlines the procedure for imposing monetary penalties but does not specify the amount.",
+    "answer_excerpt": "The DPDP Act 2023 does not specify the maximum monetary penalty for a Data Fiduciary's failure to take reasonable security safeguards. The relevant section, DPDP Act 2023, s. 8(5), requires a Data Fiduciary to take reasonable security safeguards but does not detail the penalties for non-compliance. For specific penalty details, one would need to refer to other sections of the Act or the Rules, but"
+  },
+  {
+    "id": "penalty-breach-notice",
+    "retrieval_hit": false,
+    "retrieved": [
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 27",
+      "DPDP Rules 2025 | r. 7",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | r. 7",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 7",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 7",
+      "DPDP Act 2023 | s. 33",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 7"
+    ],
+    "answer_contains": [
+      null
+    ],
+    "answer_ok": false,
+    "answer": "The penalty for failing to notify a personal data breach to the Board is not explicitly stated in the provided context. However, the DPDP Act 2023, s. 33 outlines the process for imposing penalties for breaches of the Act. According to s. 33(1), the Board can impose a monetary penalty, and the amount is determined based on various factors, including the nature and gravity of the breach (DPDP Act 2023, s. 33(2)(a)).\n\nFor specific details on the penalty for failing to notify a breach, you would need to refer to the relevant sections of the DPDP Act 2023 or the DPDP Rules 2025, which are not provided in the given context. Therefore, based on the information provided, I cannot specify the exact penalty for this particular breach notification failure. (DPDP Act 2023, s. 33)",
+    "answer_excerpt": "The penalty for failing to notify a personal data breach to the Board is not explicitly stated in the provided context. However, the DPDP Act 2023, s. 33 outlines the process for imposing penalties for breaches of the Act. According to s. 33(1), the Board can impose a monetary penalty, and the amount is determined based on various factors, including the nature and gravity of the breach (DPDP Act 2"
+  },
+  {
+    "id": "breach-72h",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 7",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 7",
+      "DPDP Rules 2025 | r. 7",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 8",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 7",
+      "Lok Sabha Q&A AU4091 (12 Aug 2026): implementation status | QA AU4091",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | THE SCHEDULE",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 7"
+    ],
+    "answer_contains": [
+      "seventy-two hours"
+    ],
+    "answer_ok": true,
+    "answer": "According to the DPDP Rules 2025, a Data Fiduciary must provide detailed information of a breach to the Board within seventy-two hours of becoming aware of the breach, or within such longer period as the Board may allow on a request made in writing in this behalf. Specifically, Rule 7(2)(b) states:\n\n\"(b) within seventy-two hours of becoming aware of the same, or within such longer period as the Board may allow on a request made in writing in this behalf,\u2014 \n(i) updated and detailed information in respect of such description; \n(ii) the broad facts related to the events, circumstances and reasons leading to \nthe breach; \n(iii) measures implemented or proposed, if any, to mitigate risk;  \n(iv) any findings regarding the person who caused the breach;  \n(v) remedial measures taken to prevent recurrence of such breach; and \n(vi) a report regarding the intimations given to affected Data Principals.\"\n\nThis requirement is in force as of 13 November 2025, as per the commencement notification G.S.R. 843(E) and Rule 1 of the DPDP Rules 2025.",
+    "answer_excerpt": "According to the DPDP Rules 2025, a Data Fiduciary must provide detailed information of a breach to the Board within seventy-two hours of becoming aware of the breach, or within such longer period as the Board may allow on a request made in writing in this behalf. Specifically, Rule 7(2)(b) states:\n\n\"(b) within seventy-two hours of becoming aware of the same, or within such longer period as the Bo"
+  },
+  {
+    "id": "consent-manager-networth",
+    "retrieval_hit": true,
+    "retrieved": [
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | FIRST SCHEDULE PART A",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | FIRST SCHEDULE PART A",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | r. 4",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 4",
+      "DPDP Rules 2025 | FIRST SCHEDULE PART B",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | FIRST SCHEDULE PART B",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | FIRST SCHEDULE PART B",
+      "DPDP Rules 2025 | FIRST SCHEDULE PART B"
+    ],
+    "answer_contains": [
+      "two crore"
+    ],
+    "answer_ok": true,
+    "answer": "The minimum net worth required for Consent Manager registration is not less than two crore rupees (INR 2 crores). This requirement is specified in both the DPDP Rules 2025 (DPDP Rules 2025, r. 4(3)) and the Draft DPDP Rules 2025 (Draft DPDP Rules 2025, r. 4(3)).",
+    "answer_excerpt": "The minimum net worth required for Consent Manager registration is not less than two crore rupees (INR 2 crores). This requirement is specified in both the DPDP Rules 2025 (DPDP Rules 2025, r. 4(3)) and the Draft DPDP Rules 2025 (Draft DPDP Rules 2025, r. 4(3))."
+  },
+  {
+    "id": "commencement-phase-3",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 1",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 1",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | preamble",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | preamble",
+      "DPDP Rules 2025 | preamble",
+      "DPDP Act 2023 | s. 41",
+      "DPDP Rules 2025 | preamble",
+      "Commencement Notification G.S.R. 843(E) (13 Nov 2025) | GSR 843(E)",
+      "DPDP Rules 2025 | FIRST SCHEDULE PART A",
+      "DPDP Rules 2025 | SECOND SCHEDULE"
+    ],
+    "answer_contains": [
+      "Rules 3",
+      "eighteen months"
+    ],
+    "answer_ok": true,
+    "answer": "According to the DPDP Rules 2025, the following rules come into force eighteen months after publication:\n\n- Rules 3, 5 to 16, 22, and 23 (DPDP Rules 2025, r. 1(4)).\n\nThis is explicitly stated in Rule 1(4) of the DPDP Rules 2025.",
+    "answer_excerpt": "According to the DPDP Rules 2025, the following rules come into force eighteen months after publication:\n\n- Rules 3, 5 to 16, 22, and 23 (DPDP Rules 2025, r. 1(4)).\n\nThis is explicitly stated in Rule 1(4) of the DPDP Rules 2025."
+  },
+  {
+    "id": "commencement-in-force-now",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Act 2023 | s. 38",
+      "DPDP Act 2023 | s. 1",
+      "DPDP Rules 2025 | r. 1",
+      "DPDP Act 2023 | s. 40",
+      "DPDP Rules 2025 | preamble",
+      "DPDP Act 2023 | THE SCHEDULE",
+      "Lok Sabha Q&A AU4091 (12 Aug 2026): implementation status | QA AU4091",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 1",
+      "DPDP Act 2023 | s. 43",
+      "Lok Sabha Q&A AU3960 (12 Aug 2026): Board appointments | QA AU3960"
+    ],
+    "answer_contains": [
+      "13 November 2025",
+      null
+    ],
+    "answer_ok": false,
+    "answer": "As of 2026, the following provisions of the Digital Personal Data Protection Act, 2023 (DPDP Act) are currently in force:\n\n- Sections 1(2), 2, 18-26, 35, 38-43, 44(1), (3) (DPDP Act 2023, s. 1(2), 2, 18-26, 35, 38-43, 44(1), (3)).\n- Rules 1, 2, 17-21 (DPDP Rules 2025, r. 1, 2, 17-21).\n\nThese provisions came into force on 13 November 2025, as per the commencement notification G.S.R. 843(E) and Rule 1 of the DPDP Rules 2025.",
+    "answer_excerpt": "As of 2026, the following provisions of the Digital Personal Data Protection Act, 2023 (DPDP Act) are currently in force:\n\n- Sections 1(2), 2, 18-26, 35, 38-43, 44(1), (3) (DPDP Act 2023, s. 1(2), 2, 18-26, 35, 38-43, 44(1), (3)).\n- Rules 1, 2, 17-21 (DPDP Rules 2025, r. 1, 2, 17-21).\n\nThese provisions came into force on 13 November 2025, as per the commencement notification G.S.R. 843(E) and Rule"
+  },
+  {
+    "id": "corrigendum",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 1",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 1",
+      "DPDP Rules 2025 | preamble",
+      "DPDP Rules 2025 | preamble",
+      "DPDP Act 2023 | s. 44",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 5",
+      "Corrigendum G.S.R. 892(E) (10 Dec 2025) | GSR 892(E)",
+      "DPDP Act 2023 | s. 44",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | preamble",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary"
+    ],
+    "answer_contains": [
+      "Official Gazette",
+      "Departments"
+    ],
+    "answer_ok": true,
+    "answer": "Corrigendum G.S.R. 892(E) (10 Dec 2025) made several changes to the DPDP Rules 2025. Specifically, it corrected the following:\n\n1. In page 24, lines 22 and 24, it changed \"of this Gazette\" to \"in the Official Gazette.\"\n2. In page 29, line 44, it changed \"Department\" to \"Departments.\"\n3. In page 32, line 4, it changed \"given in such\" to \"given in such order.\"\n4. In page 34, lines 1 and 26, it changed \"(18 or 2013)\" to \"(18 of 2013).\"\n5. In page 38, lines 2, 1 to 15, it changed \"(a) to (f)\" to \"(a) to (g).\"\n\nThese corrections were made to ensure the accuracy and clarity of the DPDP Rules 2025. (Corrigendum G.S.R. 892(E), GSR 892(E))",
+    "answer_excerpt": "Corrigendum G.S.R. 892(E) (10 Dec 2025) made several changes to the DPDP Rules 2025. Specifically, it corrected the following:\n\n1. In page 24, lines 22 and 24, it changed \"of this Gazette\" to \"in the Official Gazette.\"\n2. In page 29, line 44, it changed \"Department\" to \"Departments.\"\n3. In page 32, line 4, it changed \"given in such\" to \"given in such order.\"\n4. In page 34, lines 1 and 26, it chang"
+  },
+  {
+    "id": "board-status",
+    "retrieval_hit": true,
+    "retrieved": [
+      "Lok Sabha Q&A AU3960 (12 Aug 2026): Board appointments | QA AU3960",
+      "DPDP Act 2023 | s. 19",
+      "Lok Sabha Q&A AU4091 (12 Aug 2026): implementation status | QA AU4091",
+      "Lok Sabha Q&A AU3960 (12 Aug 2026): Board appointments | QA AU3960",
+      "Lok Sabha Q&A AU3960 (12 Aug 2026): Board appointments | QA AU3960",
+      "Board Composition Notification G.S.R. 845(E) (13 Nov 2025) | GSR 845(E)",
+      "DPDP Act 2023 | s. 21",
+      "Board Establishment Notification G.S.R. 844(E) (13 Nov 2025) | GSR 844(E)",
+      "DPDP Rules 2025 | r. 16",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 16"
+    ],
+    "answer_contains": [
+      "6 June 2026"
+    ],
+    "answer_ok": true,
+    "answer": "As of the information provided, the Chairperson and Members of the Data Protection Board of India have not yet been appointed. The advertisement for recruitment to the posts of Chairperson and Members was published in the Employment News on 6 June 2026 (DPDP Act 2023, s. 19(2); QA AU3960 (12 Aug 2026)). According to the Board Composition Notification G.S.R. 845(E) (13 Nov 2025), the Board is composed of four Members, but the appointments have not been made yet (QA AU3960 (12 Aug 2026); QA AU4091 (12 Aug 2026); QA AU3960 (12 Aug 2026); G.S.R. 845(E) (13 Nov 2025)).",
+    "answer_excerpt": "As of the information provided, the Chairperson and Members of the Data Protection Board of India have not yet been appointed. The advertisement for recruitment to the posts of Chairperson and Members was published in the Employment News on 6 June 2026 (DPDP Act 2023, s. 19(2); QA AU3960 (12 Aug 2026)). According to the Board Composition Notification G.S.R. 845(E) (13 Nov 2025), the Board is compo"
+  },
+  {
+    "id": "consultation-submissions",
+    "retrieval_hit": true,
+    "retrieved": [
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | preamble",
+      "DPDP Rules 2025 | preamble",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 18",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 18",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 18",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | r. 19",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | preamble",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 9"
+    ],
+    "answer_contains": [
+      "6,951"
+    ],
+    "answer_ok": true,
+    "answer": "According to the MeitY Summary of Submissions on Draft Rules (14 Jan 2026), 6,951 comments and submissions were received via the MyGov portal. Therefore, the number of responses received on the draft DPDP Rules consultation is 6,951. (MeitY Summary of Submissions on Draft Rules 2026, summary)",
+    "answer_excerpt": "According to the MeitY Summary of Submissions on Draft Rules (14 Jan 2026), 6,951 comments and submissions were received via the MyGov portal. Therefore, the number of responses received on the draft DPDP Rules consultation is 6,951. (MeitY Summary of Submissions on Draft Rules 2026, summary)"
+  },
+  {
+    "id": "child-consent",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 10",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 10",
+      "DPDP Act 2023 | s. 9",
+      "DPDP Rules 2025 | r. 10",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 10",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 10",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 10",
+      "DPDP Act 2023 | s. 7",
+      "DPDP Rules 2025 | r. 10"
+    ],
+    "answer_contains": [
+      "virtual token"
+    ],
+    "answer_ok": true,
+    "answer": "A Data Fiduciary can verify the identity of a parent before processing a child's data in the following ways, as per the DPDP Rules 2025, r. 10:\n\n1. By checking reliable identity and age details of the parent that are available with the Data Fiduciary.\n2. By verifying details of identity and age, voluntarily provided by the parent:\n   - Directly by the parent.\n   - Through a virtual token mapped to such details, which is issued by an authorised entity.\n3. By using identity and age details issued by an entity entrusted by law or the Government with the maintenance of such details or a virtual token mapped to the same.\n4. By using identity and age details verified and made available by a Digital Locker service provider.\n\nThese methods are outlined in the rules to ensure that the parent's identity is verified appropriately before processing the child's personal data. (DPDP Rules 2025, r. 10)",
+    "answer_excerpt": "A Data Fiduciary can verify the identity of a parent before processing a child's data in the following ways, as per the DPDP Rules 2025, r. 10:\n\n1. By checking reliable identity and age details of the parent that are available with the Data Fiduciary.\n2. By verifying details of identity and age, voluntarily provided by the parent:\n   - Directly by the parent.\n   - Through a virtual token mapped to"
+  },
+  {
+    "id": "retention-logs",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 8",
+      "DPDP Rules 2025 | r. 8",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | r. 8",
+      "DPDP Act 2023 | s. 8",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 8",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 8",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 6",
+      "DPDP Rules 2025 | r. 8",
+      "DPDP Rules 2025 | r. 6"
+    ],
+    "answer_contains": [
+      "one year"
+    ],
+    "answer_ok": true,
+    "answer": "According to the DPDP Rules 2025, Rule 8(3), a Data Fiduciary must retain processing logs and traffic data for a minimum period of one year from the date of such processing. This retention period applies unless further retention is required for compliance with any other law for the time being in force or notified by the Government.\n\n\\((\\text{DPDP Rules 2025, r. 8(3)})\\)",
+    "answer_excerpt": "According to the DPDP Rules 2025, Rule 8(3), a Data Fiduciary must retain processing logs and traffic data for a minimum period of one year from the date of such processing. This retention period applies unless further retention is required for compliance with any other law for the time being in force or notified by the Government.\n\n\\((\\text{DPDP Rules 2025, r. 8(3)})\\)"
+  }
+]

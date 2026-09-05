@@ -1,0 +1,13 @@
+[project]
+name = "dpdp-rag"
+version = "0.1.0"
+description = "RAG chatbot over the DPDP Act 2023 and DPDP Rules 2025 with section-level citations"
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=0.5",
+    "ollama>=0.3",
+    "pypdf>=4.0",
+]
+
+[tool.setuptools]
+packages = ["dpdp_rag"]

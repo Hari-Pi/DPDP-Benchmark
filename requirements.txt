@@ -1,0 +1,6 @@
+chromadb>=0.5
+ollama>=0.3
+pypdf>=4.0
+fastapi>=0.110
+uvicorn>=0.29
+requests>=2.31
