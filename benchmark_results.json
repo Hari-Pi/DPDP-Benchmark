@@ -243,5 +243,145 @@
     "answer_ok": true,
     "answer": "According to the DPDP Rules 2025, Rule 8(3), a Data Fiduciary must retain processing logs and traffic data for a minimum period of one year from the date of such processing. This retention period applies unless further retention is required for compliance with any other law for the time being in force or notified by the Government.\n\n\\((\\text{DPDP Rules 2025, r. 8(3)})\\)",
     "answer_excerpt": "According to the DPDP Rules 2025, Rule 8(3), a Data Fiduciary must retain processing logs and traffic data for a minimum period of one year from the date of such processing. This retention period applies unless further retention is required for compliance with any other law for the time being in force or notified by the Government.\n\n\\((\\text{DPDP Rules 2025, r. 8(3)})\\)"
+  },
+  {
+    "id": "erasure-notice-48h",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 8",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 8",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | r. 8",
+      "DPDP Rules 2025 | r. 8",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 8",
+      "DPDP Act 2023 | s. 8",
+      "DPDP Act 2023 | s. 12"
+    ],
+    "answer_contains": [
+      "forty-eight hours"
+    ],
+    "answer_ok": true,
+    "answer": "Under Rule 8 of the DPDP Rules 2025, a Data Fiduciary must inform the Data Principal at least forty-eight hours before the completion of the time period for erasure of personal data, unless the Data Principal initiates contact with the Data Fiduciary for the performance of the specified purpose or exercises her rights in relation to the processing of such personal data. This requirement is stated in both the final version of Rule 8 (DPDP Rules 2025, r. 8) and the draft version (Draft DPDP Rules 2025, draft r. 8).\n\nSource: (DPDP Rules 2025, r. 8(2)) and (Draft DPDP Rules 2025, draft r. 8(2))",
+    "answer_excerpt": "Under Rule 8 of the DPDP Rules 2025, a Data Fiduciary must inform the Data Principal at least forty-eight hours before the completion of the time period for erasure of personal data, unless the Data Principal initiates contact with the Data Fiduciary for the performance of the specified purpose or exercises her rights in relation to the processing of such personal data. This requirement is stated "
+  },
+  {
+    "id": "grievance-window",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 14",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 13",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 13",
+      "Lok Sabha Q&A AU4091 (12 Aug 2026): implementation status | QA AU4091",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 13",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | r. 8"
+    ],
+    "answer_contains": [
+      "ninety days"
+    ],
+    "answer_ok": true,
+    "answer": "According to DPDP Rules 2025, Rule 14(3), a Data Fiduciary and Consent Manager must respond to the grievances of Data Principals within a reasonable period not exceeding ninety days. However, the exact number of days is not specified in the rule. For more specific timelines, you may refer to DPDP Act 2023, Section 13(2), which states that the Data Fiduciary or Consent Manager shall respond to any grievances within such period as may be prescribed from the date of its receipt. As of the information provided, no specific period has been prescribed by the government. (DPDP Rules 2025, r. 14(3); DPDP Act 2023, s. 13(2))",
+    "answer_excerpt": "According to DPDP Rules 2025, Rule 14(3), a Data Fiduciary and Consent Manager must respond to the grievances of Data Principals within a reasonable period not exceeding ninety days. However, the exact number of days is not specified in the rule. For more specific timelines, you may refer to DPDP Act 2023, Section 13(2), which states that the Data Fiduciary or Consent Manager shall respond to any "
+  },
+  {
+    "id": "sdf-dpia",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 13",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 12",
+      "DPDP Rules 2025 | r. 13",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 12",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 10",
+      "DPDP Act 2023 | s. 10",
+      "DPDP Act 2023 | s. 10"
+    ],
+    "answer_contains": [
+      "twelve months"
+    ],
+    "answer_ok": true,
+    "answer": "According to the DPDP Rules 2025, a Significant Data Fiduciary must undertake a Data Protection Impact Assessment once in every period of twelve months from the date on which it is notified as such or is included in the class of Data Fiduciaries notified as such (DPDP Rules 2025, r. 13(1)). This obligation is consistent with the provisions in the draft DPDP Rules 2025, which also state the same frequency (Draft DPDP Rules 2025, draft r. 12(1)).",
+    "answer_excerpt": "According to the DPDP Rules 2025, a Significant Data Fiduciary must undertake a Data Protection Impact Assessment once in every period of twelve months from the date on which it is notified as such or is included in the class of Data Fiduciaries notified as such (DPDP Rules 2025, r. 13(1)). This obligation is consistent with the provisions in the draft DPDP Rules 2025, which also state the same fr"
+  },
+  {
+    "id": "localization-sdf",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 15",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 14",
+      "DPDP Rules 2025 | r. 13",
+      "DPDP Act 2023 | s. 16",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 12",
+      "DPDP Act 2023 | s. 10",
+      "DPDP Act 2023 | s. 10",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary"
+    ],
+    "answer_contains": [
+      "not transferred outside the territory of India"
+    ],
+    "answer_ok": true,
+    "answer": "A Significant Data Fiduciary is required to ensure that personal data specified by the Central Government, on the basis of the recommendations of a committee constituted by it, is processed subject to the restriction that the personal data and the traffic data pertaining to its flow is not transferred outside the territory of India. This restriction is explicitly stated in Rule 13(4) of the DPDP Rules 2025 (DPDP Rules 2025, r. 13(4)).",
+    "answer_excerpt": "A Significant Data Fiduciary is required to ensure that personal data specified by the Central Government, on the basis of the recommendations of a committee constituted by it, is processed subject to the restriction that the personal data and the traffic data pertaining to its flow is not transferred outside the territory of India. This restriction is explicitly stated in Rule 13(4) of the DPDP R"
+  },
+  {
+    "id": "def-personal-data",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Act 2023 | preamble",
+      "DPDP Act 2023 | s. 2",
+      "DPDP Rules 2025 | r. 2",
+      "DPDP Act 2023 | s. 7",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 4",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 11"
+    ],
+    "answer_contains": [
+      "identifiable"
+    ],
+    "answer_ok": true,
+    "answer": "According to the DPDP Act 2023, section 2, \"personal data\" is defined as:\n\n> \"personal data\" means any data about an individual who is identifiable by or in relation to such data.\n\nThis definition is explicitly stated in the Act's section 2.",
+    "answer_excerpt": "According to the DPDP Act 2023, section 2, \"personal data\" is defined as:\n\n> \"personal data\" means any data about an individual who is identifiable by or in relation to such data.\n\nThis definition is explicitly stated in the Act's section 2."
+  },
+  {
+    "id": "board-inquiry-timeline",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Rules 2025 | r. 19",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 18",
+      "DPDP Act 2023 | s. 28",
+      "DPDP Act 2023 | s. 28",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Rules 2025 | r. 19",
+      "Lok Sabha Q&A AU4091 (12 Aug 2026): implementation status | QA AU4091",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary"
+    ],
+    "answer_contains": [
+      "six months"
+    ],
+    "answer_ok": true,
+    "answer": "An inquiry by the Board must be completed within a period of six months from the date of receipt of the intimation, complaint, reference, or direction under section 27 of the Act, unless such period is extended by the Board for reasons to be recorded in writing, for a further period not exceeding three months at a time. This is stated in section 28(9) of the DPDP Act 2023 (DPDP Act 2023, s. 28(9)). The same period is also reflected in the Draft DPDP Rules 2025 (Draft DPDP Rules 2025, draft r. 18(9)).",
+    "answer_excerpt": "An inquiry by the Board must be completed within a period of six months from the date of receipt of the intimation, complaint, reference, or direction under section 27 of the Act, unless such period is extended by the Board for reasons to be recorded in writing, for a further period not exceeding three months at a time. This is stated in section 28(9) of the DPDP Act 2023 (DPDP Act 2023, s. 28(9))"
+  },
+  {
+    "id": "appeal-tribunal",
+    "retrieval_hit": true,
+    "retrieved": [
+      "DPDP Act 2023 | s. 29",
+      "DPDP Act 2023 | s. 29",
+      "DPDP Rules 2025 | r. 22",
+      "Draft DPDP Rules 2025 (G.S.R. 02(E), 3 Jan 2025) | draft r. 21",
+      "MeitY Summary of Submissions on Draft Rules (14 Jan 2026) | summary",
+      "DPDP Act 2023 | s. 30",
+      "DPDP Act 2023 | s. 33",
+      "DPDP Rules 2025 | r. 19"
+    ],
+    "answer_contains": [
+      "sixty days"
+    ],
+    "answer_ok": true,
+    "answer": "An appeal against a Board order must be filed within a period of sixty days from the date of receipt of the order or direction appealed against (DPDP Act 2023, s. 29(2)).",
+    "answer_excerpt": "An appeal against a Board order must be filed within a period of sixty days from the date of receipt of the order or direction appealed against (DPDP Act 2023, s. 29(2))."
   }
 ]
