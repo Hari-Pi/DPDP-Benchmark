@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en" data-theme="winter">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Ask questions about India's DPDP Act 2023 and DPDP Rules 2025 — answered only from the official gazette texts, with section-level citations.">
+<title>DPDP RAG — Act 2023 &amp; Rules 2025</title>
+
+<script>
+  // Resolve the theme before first paint so there is no light/dark flash.
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('dpdp.theme'); } catch (e) {}
+    var dark = saved ? saved === 'dark'
+                     : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', dark ? 'night' : 'winter');
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css">
+<link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<style>
+  :root {
+    --radius-selector: 0.75rem;
+    --radius-field:    0.75rem;
+    --radius-box:      1rem;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: Inter, -apple-system, "Segoe UI", system-ui, sans-serif;
+    overflow: hidden;
+    overscroll-behavior-y: none;
+  }
+  .font-serif-brand { font-family: "Source Serif 4", Georgia, serif; }
+
+  /* Soft ambient wash behind the conversation, tinted by the active theme. */
+  .app-bg {
+    background-image:
+      radial-gradient(60rem 32rem at 12% -8%,
+        color-mix(in oklab, var(--color-primary) 12%, transparent), transparent 70%),
+      radial-gradient(52rem 30rem at 92% 4%,
+        color-mix(in oklab, var(--color-secondary) 10%, transparent), transparent 72%);
+  }
+
+  /* Scrollbar that follows the theme instead of the OS. */
+  #scroller { scrollbar-width: thin; scrollbar-color: var(--color-base-300) transparent; }
+  #scroller::-webkit-scrollbar { width: 10px; }
+  #scroller::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-base-content) 18%, transparent);
+    border: 3px solid transparent; background-clip: content-box; border-radius: 99px;
+  }
+  #scroller::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--color-base-content) 32%, transparent);
+    border: 3px solid transparent; background-clip: content-box;
+  }
+
+  /* ---- Markdown answer body -------------------------------------------- */
+  .answer { line-height: 1.68; overflow-wrap: anywhere; }
+  .answer > :first-child { margin-top: 0; }
+  .answer > :last-child  { margin-bottom: 0; }
+  .answer p { margin: 0.7em 0; }
+  .answer h1, .answer h2, .answer h3, .answer h4 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 600; line-height: 1.3; margin: 1.2em 0 0.5em;
+  }
+  .answer h1 { font-size: 1.35rem; }
+  .answer h2 { font-size: 1.2rem; }
+  .answer h3 { font-size: 1.06rem; }
+  .answer ul, .answer ol { margin: 0.7em 0; padding-left: 1.4em; }
+  .answer ul { list-style: disc; }
+  .answer ol { list-style: decimal; }
+  .answer li { margin: 0.3em 0; }
+  .answer li::marker { color: color-mix(in oklab, var(--color-primary) 70%, var(--color-base-content)); }
+  .answer a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 2px; }
+  .answer strong { font-weight: 600; }
+  .answer code {
+    font-size: 0.87em; padding: 0.12em 0.38em; border-radius: 0.35rem;
+    background: color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  }
+  .answer pre {
+    margin: 0.8em 0; padding: 0.85rem 1rem; border-radius: var(--radius-box);
+    overflow-x: auto; background: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+  }
+  .answer pre code { background: none; padding: 0; }
+  .answer blockquote {
+    margin: 0.8em 0; padding: 0.15em 0 0.15em 0.95em;
+    border-left: 3px solid color-mix(in oklab, var(--color-primary) 55%, transparent);
+    color: color-mix(in oklab, var(--color-base-content) 78%, transparent);
+    font-style: italic;
+  }
+  .answer table {
+    display: block; width: 100%; overflow-x: auto; margin: 0.9em 0;
+    border-collapse: collapse; font-size: 0.92em;
+  }
+  .answer th, .answer td {
+    border: 1px solid var(--color-base-300); padding: 0.45rem 0.7rem; text-align: left;
+  }
+  .answer th { background: var(--color-base-200); font-weight: 600; }
+  .answer hr { margin: 1.2em 0; border: 0; border-top: 1px solid var(--color-base-300); }
+
+  /* Inline statutory citations picked out of the prose, e.g. (DPDP Act 2023, s. 8(5)). */
+  .cite {
+    white-space: nowrap; font-size: 0.86em; font-weight: 500;
+    padding: 0.06em 0.32em; margin: 0 0.02em; border-radius: 0.4rem;
+    color: color-mix(in oklab, var(--color-primary) 82%, var(--color-base-content));
+    background: color-mix(in oklab, var(--color-primary) 11%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-primary) 22%, transparent);
+  }
+
+  /* ---- Motion ----------------------------------------------------------- */
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .rise { animation: rise .28s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .shimmer {
+    background: linear-gradient(90deg,
+      color-mix(in oklab, var(--color-base-content) 40%, transparent) 25%,
+      var(--color-base-content) 50%,
+      color-mix(in oklab, var(--color-base-content) 40%, transparent) 75%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+    animation: shimmer 2.4s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rise, .shimmer { animation: none; }
+    .shimmer { color: inherit; -webkit-text-fill-color: currentColor; }
+  }
+
+  /* ---- Focus rings ------------------------------------------------------ */
+  #f:focus-within {
+    border-color: color-mix(in oklab, var(--color-primary) 55%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-primary) 13%, transparent);
+  }
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 35%, transparent);
+  }
+
+  /* Textarea grows with the question up to a cap, then scrolls — by caret or
+     wheel — without ever painting a scrollbar track inside the composer. */
+  #q {
+    max-height: 11rem;
+    overflow-y: auto;
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* legacy Edge */
+  }
+  #q::-webkit-scrollbar { width: 0; height: 0; display: none; }
+</style>
+</head>
+
+<body class="bg-base-200 text-base-content antialiased">
+<div class="flex h-dvh flex-col">
+
+  <!-- ======================= Header ======================= -->
+  <header class="sticky top-0 z-30 border-b border-base-300/80 bg-base-100/85 backdrop-blur-xl">
+    <div class="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-2.5">
+
+      <div class="flex min-w-0 items-center gap-3">
+        <div class="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-content shadow-sm shadow-primary/30">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l7 3v5.5c0 4.3-2.9 8.2-7 9.5-4.1-1.3-7-5.2-7-9.5V6l7-3z"/>
+            <path d="M9 12.2l2.1 2.1L15.2 10"/>
+          </svg>
+        </div>
+        <div class="min-w-0 leading-tight">
+          <h1 class="font-serif-brand truncate text-[1.05rem] font-semibold tracking-tight">DPDP Research Assistant</h1>
+          <p class="hidden truncate text-xs text-base-content/60 sm:block">
+            DPDP Act 2023 &middot; DPDP Rules 2025 &middot; official gazette corpus
+          </p>
+        </div>
+      </div>
+
+      <div class="ml-auto flex items-center gap-1">
+        <div id="statusPill" class="tooltip tooltip-bottom mr-1 hidden sm:block" data-tip="Checking backend…">
+          <span class="badge badge-sm badge-ghost gap-1.5 font-medium">
+            <span id="statusDot" class="inline-block size-1.5 rounded-full bg-base-content/40"></span>
+            <span id="statusText">connecting</span>
+          </span>
+        </div>
+
+        <div class="tooltip tooltip-bottom" data-tip="About this assistant">
+          <button class="btn btn-ghost btn-circle btn-sm" onclick="aboutModal.showModal()" aria-label="About">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-[1.15rem]" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6v.5"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="tooltip tooltip-bottom" data-tip="New conversation">
+          <button id="clearBtn" class="btn btn-ghost btn-circle btn-sm" aria-label="New conversation">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-[1.15rem]" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="tooltip tooltip-left" data-tip="Toggle theme">
+          <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm">
+            <input type="checkbox" id="themeToggle" aria-label="Toggle dark mode">
+            <svg class="swap-off size-[1.15rem]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4.2"/>
+              <path d="M12 3v1.8M12 19.2V21M3 12h1.8M19.2 12H21M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M18.4 5.6l-1.3 1.3M6.9 17.1l-1.3 1.3"/>
+            </svg>
+            <svg class="swap-on size-[1.15rem]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 14.5A8.2 8.2 0 019.6 4 8.4 8.4 0 1020 14.5z"/>
+            </svg>
+          </label>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================= Conversation ======================= -->
+  <main id="scroller" class="app-bg relative flex-1 overflow-y-auto">
+    <div id="chat" class="mx-auto w-full max-w-3xl space-y-5 px-4 py-6 sm:py-8"></div>
+  </main>
+
+  <button id="toBottom"
+          class="btn btn-circle btn-sm fixed bottom-32 left-1/2 z-20 hidden -translate-x-1/2 border border-base-300 bg-base-100 text-base-content/70 shadow-lg hover:text-base-content"
+          aria-label="Scroll to latest">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M6 13l6 6 6-6"/>
+    </svg>
+  </button>
+
+  <!-- ======================= Composer ======================= -->
+  <div class="border-t border-base-300/80 bg-base-100/90 backdrop-blur-xl">
+    <div class="mx-auto w-full max-w-3xl px-4 pb-3 pt-3">
+      <form id="f"
+            class="flex items-end gap-1.5 rounded-2xl border border-base-300 bg-base-100 p-1.5 shadow-sm transition">
+
+        <details id="settings" class="dropdown dropdown-top">
+          <summary class="btn btn-ghost btn-circle btn-sm m-0.5" aria-label="Retrieval settings">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-[1.15rem]" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M4 7h10M18 7h2M4 17h4M12 17h8"/>
+              <circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/>
+            </svg>
+          </summary>
+          <div class="dropdown-content z-40 mb-2 w-72 rounded-box border border-base-300 bg-base-100 p-4 shadow-xl">
+            <p class="mb-3 text-sm font-semibold">Retrieval settings</p>
+
+            <label class="mb-1 flex items-center justify-between text-xs font-medium text-base-content/70">
+              <span>Passages retrieved</span>
+              <span id="kVal" class="badge badge-sm badge-primary font-mono">8</span>
+            </label>
+            <input id="kRange" type="range" min="1" max="20" value="8" class="range range-primary range-xs">
+            <p class="mb-4 mt-1 text-[0.7rem] leading-snug text-base-content/50">
+              More passages means broader coverage, but a slower and longer prompt.
+            </p>
+
+            <label class="mb-1 block text-xs font-medium text-base-content/70" for="modelInput">Chat model</label>
+            <input id="modelInput" type="text" spellcheck="false"
+                   class="input input-sm input-bordered w-full font-mono text-xs" placeholder="qwen2.5:7b-instruct">
+            <p class="mt-1 text-[0.7rem] leading-snug text-base-content/50">Any model pulled in your local Ollama.</p>
+
+            <button type="button" id="resetSettings" class="btn btn-ghost btn-xs mt-3 w-full">Reset to defaults</button>
+          </div>
+        </details>
+
+        <textarea id="q" rows="1" autocomplete="off"
+                  class="min-h-10 flex-1 resize-none border-0 bg-transparent px-1.5 py-2 text-[0.95rem] leading-6
+                         placeholder:text-base-content/40 focus:outline-none"
+                  placeholder="Ask about notices, consent, breach reporting, penalties, the Board…"></textarea>
+
+        <button id="send" type="submit" class="btn btn-primary btn-circle m-0.5" aria-label="Send question">
+          <svg id="sendIcon" xmlns="http://www.w3.org/2000/svg" class="size-[1.15rem]" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h13M12 5.5l6.5 6.5-6.5 6.5"/>
+          </svg>
+          <span id="sendSpinner" class="loading loading-spinner loading-sm hidden"></span>
+        </button>
+      </form>
+
+      <div class="mt-2 flex items-center justify-between gap-3 px-1 text-[0.7rem] text-base-content/45">
+        <span class="hidden whitespace-nowrap lg:inline">
+          <kbd class="kbd kbd-xs">Enter</kbd> to send &middot;
+          <kbd class="kbd kbd-xs">Shift</kbd>+<kbd class="kbd kbd-xs">Enter</kbd> for a new line &middot;
+          <kbd class="kbd kbd-xs">/</kbd> to focus
+        </span>
+        <span class="ml-auto truncate text-right">General legal information from official texts — not legal advice.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= About ======================= -->
+<dialog id="aboutModal" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box border border-base-300">
+    <h3 class="font-serif-brand text-lg font-semibold">About this assistant</h3>
+    <p class="mt-3 text-sm leading-relaxed text-base-content/75">
+      A retrieval-augmented assistant over India's <strong>Digital Personal Data Protection Act, 2023</strong>
+      and the <strong>DPDP Rules, 2025</strong>, together with the commencement notification, the corrigendum,
+      the draft rules and related official material.
+    </p>
+    <ul class="mt-4 space-y-2 text-sm text-base-content/75">
+      <li class="flex gap-2"><span class="text-primary">&bull;</span>
+        Hybrid retrieval — dense embeddings fused with BM25, then reranked to prefer official (Tier&nbsp;1) sources.</li>
+      <li class="flex gap-2"><span class="text-primary">&bull;</span>
+        Answers are grounded in the retrieved passages only, with section- and rule-level citations.</li>
+      <li class="flex gap-2"><span class="text-primary">&bull;</span>
+        Runs locally against Ollama — the corpus and your questions stay on this machine.</li>
+    </ul>
+    <div role="alert" class="alert alert-warning mt-4 text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M12 9v4.5M12 17v.4"/><path d="M10.3 4l-7.1 13A2 2 0 005 20h14a2 2 0 001.8-3l-7.1-13a2 2 0 00-3.4 0z"/>
+      </svg>
+      <span>Research prototype. It can be wrong or incomplete — verify against the gazette before relying on it.</span>
+    </div>
+    <div class="modal-action">
+      <form method="dialog"><button class="btn btn-primary btn-sm">Got it</button></form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+<div class="toast toast-end z-50" id="toasts"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

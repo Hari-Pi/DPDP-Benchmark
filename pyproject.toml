@@ -11,3 +11,6 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["dpdp_rag"]
+
+[tool.setuptools.package-data]
+dpdp_rag = ["static/*"]
