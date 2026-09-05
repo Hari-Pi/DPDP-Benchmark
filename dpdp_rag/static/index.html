@@ -269,6 +269,7 @@
             <p class="mt-1 text-[0.7rem] leading-snug text-base-content/50">Any model pulled in your local Ollama.</p>
 
             <button type="button" id="resetSettings" class="btn btn-ghost btn-xs mt-3 w-full">Reset to defaults</button>
+            <button type="button" id="logoutBtn" class="btn btn-ghost btn-xs w-full text-error">Sign out</button>
           </div>
         </details>
 
@@ -329,23 +330,26 @@
   <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-<!-- ======================= Access token ======================= -->
-<dialog id="tokenModal" class="modal modal-bottom sm:modal-middle">
+<!-- ======================= Sign in ======================= -->
+<dialog id="loginModal" class="modal modal-bottom sm:modal-middle">
   <div class="modal-box border border-base-300">
-    <h3 class="font-serif-brand text-lg font-semibold">Access token</h3>
+    <h3 class="font-serif-brand text-lg font-semibold">Sign in</h3>
     <p class="mt-2 text-sm leading-relaxed text-base-content/75">
-      This assistant is private. Enter the access token you were given to start chatting.
+      This assistant is private. Sign in with your username and password.
     </p>
-    <p id="tokenError" class="mt-2 hidden text-sm font-medium text-error">
-      That token was rejected — check it and try again.
+    <p id="loginError" class="mt-2 hidden text-sm font-medium text-error">
+      Invalid username or password.
     </p>
-    <form id="tokenForm" class="mt-4 flex gap-2">
-      <input id="tokenInput" type="password" autocomplete="off" spellcheck="false"
-             class="input input-bordered input-sm flex-1 font-mono" placeholder="access token">
-      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+    <p id="loginRate" class="mt-2 hidden text-sm font-medium text-error"></p>
+    <form id="loginForm" class="mt-4 space-y-2">
+      <input id="loginUser" type="text" autocomplete="username" spellcheck="false"
+             class="input input-bordered input-sm w-full" placeholder="username">
+      <input id="loginPass" type="password" autocomplete="current-password"
+             class="input input-bordered input-sm w-full" placeholder="password">
+      <button type="submit" id="loginBtn" class="btn btn-primary btn-sm w-full">Sign in</button>
     </form>
     <p class="mt-2 text-[0.7rem] text-base-content/45">
-      Stored only in this browser (localStorage) and sent as a header with each question.
+      Repeated failures are rate limited. A signed-in session lasts 7 days.
     </p>
   </div>
   <form method="dialog" class="modal-backdrop"><button>close</button></form>

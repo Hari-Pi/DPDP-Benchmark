@@ -19,50 +19,75 @@ const toBottomBtn = $('toBottom');
 let history = [];               // [{role, content}] — trimmed to the last few turns
 let busy = false;
 
-/* ---------------------------------------------------------- access token */
+/* ------------------------------------------------------------- sign in/out */
 
-const tokenModal = $('tokenModal');
-const tokenInput = $('tokenInput');
+const loginModal = $('loginModal');
+const loginError = $('loginError');
+const loginRate = $('loginRate');
+const loginUser = $('loginUser');
+const loginPass = $('loginPass');
+const loginBtn = $('loginBtn');
 
-function getToken() {
-  try { return localStorage.getItem('dpdp.token') || ''; } catch (e) { return ''; }
+function openLogin(rejected, rateMsg) {
+  loginError.classList.toggle('hidden', !rejected);
+  loginRate.classList.toggle('hidden', !rateMsg);
+  loginRate.textContent = rateMsg || '';
+  loginUser.value = '';
+  loginPass.value = '';
+  loginModal.showModal();
+  loginUser.focus();
 }
 
-function saveToken(t) {
-  try {
-    if (t) localStorage.setItem('dpdp.token', t);
-    else localStorage.removeItem('dpdp.token');
-  } catch (e) {}
-}
+let authRequired = false;
 
-function openTokenModal(rejected) {
-  $('tokenError').classList.toggle('hidden', !rejected);
-  tokenInput.value = '';
-  tokenModal.showModal();
-  tokenInput.focus();
-}
-
-let tokenRequired = false;
-
-/** The /auth/check endpoint is open and tells us whether the server is
-    running in token-gated mode, so first-time visitors are only asked when
-    it actually matters. */
+/** /auth/check is open and tells us whether the server is in auth mode and
+    whether the current session cookie is still live. */
 async function checkAuth() {
   try {
     const res = await fetch('/auth/check', { cache: 'no-store' });
     const d = await res.json();
-    tokenRequired = !!d.token_required;
-    if (tokenRequired && !getToken()) openTokenModal(false);
+    authRequired = !!d.auth_required;
+    if (authRequired && !d.authenticated) openLogin(false);
   } catch (e) { /* offline — the status pill already shows it */ }
 }
 
-$('tokenForm').addEventListener('submit', (e) => {
+loginBtn.addEventListener('click', (e) => e.preventDefault());
+
+$('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const t = tokenInput.value.trim();
-  if (!t) return;
-  saveToken(t);
-  tokenModal.close();
-  toast('Token saved');
+  const username = loginUser.value.trim();
+  const password = loginPass.value;
+  if (!username || !password || loginBtn.disabled) return;
+  loginBtn.disabled = true;
+  loginError.classList.add('hidden');
+  loginRate.classList.add('hidden');
+  try {
+    const res = await fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, password: password }),
+    });
+    if (res.ok) {
+      loginModal.close();
+      toast('Signed in');
+      return;
+    }
+    let detail = 'Invalid username or password.';
+    try { const b = await res.json(); if (b && b.detail) detail = b.detail; } catch (err) {}
+    if (res.status === 429) openLogin(false, detail);
+    else { loginError.textContent = detail; openLogin(true); }
+  } catch (err) {
+    openLogin(false, 'Network error — is the server reachable?');
+  } finally {
+    loginBtn.disabled = false;
+  }
+});
+
+$('logoutBtn').addEventListener('click', async () => {
+  try { await fetch('/auth/logout', { method: 'POST' }); } catch (e) {}
+  $('settings').removeAttribute('open');
+  if (authRequired) openLogin(false);
+  toast('Signed out');
 });
 
 /* ------------------------------------------------------------------ theme */
@@ -511,10 +536,7 @@ async function submitQuestion(question, opts) {
   try {
     const res = await fetch('/ask', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(getToken() ? { 'X-DPDP-Token': getToken() } : {}),
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         question: question,
         history: history,
@@ -523,9 +545,8 @@ async function submitQuestion(question, opts) {
       }),
     });
     if (res.status === 401) {
-      saveToken('');
-      openTokenModal(true);
-      throw new Error('Access token required — enter the token to continue.');
+      openLogin(false);
+      throw new Error('Please sign in to continue.');
     }
     if (!res.ok) {
       let detail = 'HTTP ' + res.status + ' ' + res.statusText;

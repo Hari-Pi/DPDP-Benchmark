@@ -4,40 +4,53 @@ Endpoints:
   GET  /health          -> liveness check (always open)
   GET  /                -> continuous chat web UI (static/index.html)
   POST /ask             -> {"question": "...", "history": [...]} -> answer + sources
+  GET  /auth/check      -> {auth_required, authenticated}
+  POST /auth/login      -> {username, password} -> session cookie
+  POST /auth/logout     -> revokes the session
 
-Access control: if the DPDP_TOKEN environment variable is set, /ask requires
-that token (X-DPDP-Token header or ?token= query). Unset = local-only mode.
+Access control: when DPDP_USER + DPDP_AUTH_SALT + DPDP_AUTH_HASH are set
+(via scripts/hash_auth.py), /ask requires a valid session cookie minted by
+/auth/login. Unset = local-only mode.
 """
 import os
-import secrets
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Cookie, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import config, query
+from . import auth, config, query
 
-app = FastAPI(title="DPDP RAG", version="0.3.1",
+app = FastAPI(title="DPDP RAG", version="0.4.0",
               description="Q&A over the DPDP Act 2023 and DPDP Rules 2025")
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 MAX_HISTORY = 6
-TOKEN = os.environ.get("DPDP_TOKEN", "").strip()
+COOKIE = "dpdp_session"
 
 
-def check_token(request: Request) -> None:
-    """Reject /ask calls when a public token is configured and not presented."""
-    if not TOKEN:
+def client_ip(request: Request) -> str:
+    # Behind Cloudflare the real client IP arrives in CF-Connecting-IP.
+    return (request.headers.get("CF-Connecting-IP")
+            or (request.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
+            or (request.client.host if request.client else "unknown"))
+
+
+def session_token(request: Request, dpdp_session: str | None) -> str:
+    return request.headers.get("X-DPDP-Session") or dpdp_session or ""
+
+
+def check_auth(request: Request, dpdp_session: str | None) -> None:
+    """Reject /ask calls when auth is enabled and no live session is present."""
+    if not auth.AUTH_ENABLED:
         return
-    given = (request.headers.get("X-DPDP-Token")
-             or request.query_params.get("token") or "")
-    if not secrets.compare_digest(given, TOKEN):
-        raise HTTPException(status_code=401, detail="invalid or missing token")
+    if not auth.session_valid(session_token(request, dpdp_session)):
+        raise HTTPException(status_code=401, detail="not authenticated")
 
 
 class Message(BaseModel):
@@ -74,14 +87,54 @@ def health() -> dict:
 
 
 @app.get("/auth/check")
-def auth_check() -> dict:
-    """Open endpoint so the web UI knows whether to ask for a token."""
-    return {"token_required": bool(TOKEN)}
+def auth_check(request: Request, dpdp_session: str | None = Cookie(default=None)) -> dict:
+    """Open endpoint so the web UI knows whether to show the login dialog."""
+    return {
+        "auth_required": auth.AUTH_ENABLED,
+        "authenticated": auth.AUTH_ENABLED and auth.session_valid(
+            session_token(request, dpdp_session)),
+    }
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=256)
+
+
+@app.post("/auth/login")
+def login(body: LoginRequest, request: Request, response: Response) -> dict:
+    ip = client_ip(request)
+    allowed, retry_in = auth.login_allowed(ip)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=f"too many failed attempts — try again in {retry_in // 60 + 1} min")
+    if not auth.verify_credentials(body.username, body.password):
+        auth.login_failed(ip)
+        # uniform delay blunts username-enumeration timing probes
+        raise HTTPException(status_code=401, detail="invalid username or password")
+    auth.login_reset(ip)
+    token = auth.create_session()
+    secure = (request.url.scheme == "https"
+              or request.headers.get("X-Forwarded-Proto") == "https")
+    response.set_cookie(
+        COOKIE, token, max_age=int(auth.SESSION_TTL.total_seconds()),
+        httponly=True, samesite="lax", secure=secure, path="/")
+    return {"ok": True}
+
+
+@app.post("/auth/logout")
+def logout(request: Request, response: Response,
+           dpdp_session: str | None = Cookie(default=None)) -> dict:
+    auth.revoke_session(session_token(request, dpdp_session))
+    response.delete_cookie(COOKIE, path="/")
+    return {"ok": True}
 
 
 @app.post("/ask", response_model=AskResponse)
-def ask(req: AskRequest, request: Request) -> AskResponse:
-    check_token(request)
+def ask(req: AskRequest, request: Request,
+        dpdp_session: str | None = Cookie(default=None)) -> AskResponse:
+    check_auth(request, dpdp_session)
     history = [m.model_dump() for m in req.history[-MAX_HISTORY:]]
     answer_text, hits = query.answer(req.question, k=req.k, model=req.model,
                                      history=history)

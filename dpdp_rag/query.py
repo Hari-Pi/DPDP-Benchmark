@@ -211,9 +211,20 @@ def retrieve(question: str, k: int = config.TOP_K) -> list[dict]:
 
 def _block(hit: dict, n: int = 0) -> str:
     """Render one context passage. Shared with the budget so what we measure
-    is exactly what we send."""
+    is exactly what we send.
+
+    Chunks embed their own source label so the embedding carries that context,
+    but the block header states it too. Repeating it made several passages
+    open with identical lines — with the penalty Schedule split per entry,
+    three blocks began the same way and the model answered from the wrong one.
+    """
     m = hit["meta"]
-    return f"[{n}] {m['source']}, {m['unit']}\n{hit['text']}"
+    text = hit["text"]
+    embedded = f"{m['source'].split(' (')[0]}, {m['unit']}."
+    first, sep, rest = text.partition("\n")
+    if sep and first.strip() == embedded:
+        text = rest
+    return f"[{n}] {m['source']}, {m['unit']}\n{text}"
 
 
 def build_context(hits: list[dict]) -> str:

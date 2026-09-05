@@ -59,7 +59,8 @@ CASES = [
         "id": "commencement-phase-3",
         "q": "Which rules of the DPDP Rules 2025 come into force eighteen months after publication?",
         "expect_units": ["r. 1", "GSR 843(E)"],
-        "expect_facts": ["Rules 3", "eighteen months||18 months"],
+        "expect_facts": ["Rules 3||Rule 3", "eighteen months||18 months",
+                         "13 May 2027"],
     },
     {
         "id": "commencement-in-force-now",
@@ -137,7 +138,7 @@ CASES = [
         "id": "appeal-tribunal",
         "q": "Within how many days must an appeal against a Board order be filed with the Appellate Tribunal?",
         "expect_units": ["s. 29", "r. 22"],
-        "expect_facts": ["sixty days"],
+        "expect_facts": ["sixty days||60 days"],
     },
     # Negative cases: the corpus genuinely cannot answer these, so the only
     # correct behaviour is to decline. Without them the benchmark rewards a
@@ -167,7 +168,7 @@ CASES = [
 # firing on ordinary negative statements of fact such as "the Board has not
 # yet imposed any penalties".
 REFUSAL_RES = [
-    r"\bdoes not (?:specify|contain|mention|provide|state|include|address|appear)\b",
+    r"\b(?:context|corpus|passages?|documents?|excerpts?|text|DPDP Act[^.]{0,8}|Act|Rules|information)\b[^.]{0,30}\bdoes not (?:specify|contain|mention|provide|state|include|address|appear)\b",
     r"\bnot\b[^.]{0,20}\b(?:mentioned|provided|specified|stated|included|present|found|available|covered)\b[^.]{0,45}\b(?:context|corpus|passages?|documents?|text|excerpts?)\b",
     r"\b(?:cannot|can ?not|could not|unable to)\b[^.]{0,30}\b(?:provide|answer|determine|confirm|state|tell)\b",
     r"\bno information\b",
@@ -262,7 +263,11 @@ def score_answer(case: dict, answer: str, hits: list[dict]) -> dict:
 
     cited = _referenced_units(answer)
     retrieved_units = {_canon(h["meta"]["unit"]) for h in hits}
-    retrieved_text = "\n".join(h["text"] for h in hits)
+    # Include the source labels, not just the passage bodies: a gazette
+    # reference such as G.S.R. 846(E) lives in the label the model is shown,
+    # so citing it is grounded even though no passage body repeats it.
+    retrieved_text = "\n".join(h["meta"]["source"] + "\n" + h["text"]
+                               for h in hits)
     seen_in_text = _referenced_units(retrieved_text)
     row["cites_expected"] = bool(
         cited & {_canon(u) for u in case.get("expect_units", [])})

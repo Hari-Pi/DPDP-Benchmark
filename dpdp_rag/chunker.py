@@ -333,7 +333,8 @@ def build_documents() -> list[dict]:
     parts: dict = defaultdict(int)
     sources = [
         ("DPDP_Act_2023.txt", "DPDP Act 2023", "act"),
-        ("DPDP_Rules_2025_clean.txt", "DPDP Rules 2025", "rules"),
+        ("DPDP_Rules_2025_clean.txt",
+         "DPDP Rules 2025 (G.S.R. 846(E), 13 Nov 2025)", "rules"),
     ]
     for filename, source, doc_type in sources:
         raw = clean((config.TEXT_DIR / filename).read_text(encoding="utf-8"))
