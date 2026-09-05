@@ -160,17 +160,21 @@ CASES = [
     },
 ]
 
-# Phrasings the model uses when it declines. Checked against the opening of
-# the answer as well as the whole, so a leading refusal still counts even if
-# the model then rambles.
-REFUSALS = [
-    "does not specify", "does not contain", "does not provide",
-    "does not mention", "not explicitly stated", "not provided in",
-    "not mentioned in", "not available in", "not included in",
-    "is not present in", "no information", "cannot be determined",
-    "cannot answer", "is not covered", "does not appear in",
-    "outside the scope", "not found in the provided",
+# Refusal detection. Fixed substrings were too brittle: a correct decline
+# reading "is not mentioned or provided in the given context ... I cannot
+# provide details" matched none of them, because the phrases interleave.
+# These allow filler between the negation and the verb, while still not
+# firing on ordinary negative statements of fact such as "the Board has not
+# yet imposed any penalties".
+REFUSAL_RES = [
+    r"\bdoes not (?:specify|contain|mention|provide|state|include|address|appear)\b",
+    r"\bnot\b[^.]{0,20}\b(?:mentioned|provided|specified|stated|included|present|found|available|covered)\b[^.]{0,45}\b(?:context|corpus|passages?|documents?|text|excerpts?)\b",
+    r"\b(?:cannot|can ?not|could not|unable to)\b[^.]{0,30}\b(?:provide|answer|determine|confirm|state|tell)\b",
+    r"\bno information\b",
+    r"\boutside the scope\b",
+    r"\bnot explicitly stated\b",
 ]
+_REFUSAL_RE = re.compile("|".join(REFUSAL_RES), re.I)
 
 # Non-operative sources: useful context, but not the law in force.
 NOISE_DOC_TYPES = {"draft_rules", "summary", "faq"}
@@ -205,8 +209,7 @@ def _fact_match(alt: str, answer: str) -> bool:
 
 
 def _is_abstention(answer: str) -> bool:
-    head = answer[:400].lower()
-    return any(p in head for p in REFUSALS)
+    return _REFUSAL_RE.search(answer[:500]) is not None
 
 
 def _referenced_units(text: str) -> set[str]:

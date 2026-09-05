@@ -26,6 +26,33 @@ GAZETTE_NOISE = [
 ]
 
 
+# Corrigendum G.S.R. 892(E) (10 Dec 2025) corrects the Rules as notified.
+# Its corrections are anchored to gazette page and line numbers, which the
+# text extraction does not preserve, so each is applied only where its search
+# string occurs exactly the expected number of times — otherwise the wrong
+# occurrence would be rewritten. Three corrections cannot be applied this way
+# and are left to the corrigendum document itself:
+#   page 29 line 44  "Department" -> "Departments"   ("Department" occurs 4x)
+#   page 38 line 2   "." -> ";"                      (no usable anchor)
+#   page 38          "(a) to (f)" -> "(a) to (g)"    (phrase not in the extract)
+CORRIGENDA = [
+    ("of this Gazette", "in the Official Gazette", 2),
+    ("given in such", "given in such order", 1),
+    ("everybody", "every body", 1),
+    ("(18 or 2013)", "(18 of 2013)", 1),
+]
+
+
+def apply_corrigenda(text: str) -> tuple[str, list[str]]:
+    """Return the Rules text as corrected, plus the corrections applied."""
+    applied = []
+    for old, new, expected in CORRIGENDA:
+        if text.count(old) == expected:
+            text = text.replace(old, new)
+            applied.append(f"{old!r} -> {new!r}")
+    return text, applied
+
+
 def clean(text: str) -> str:
     """Drop gazette page furniture, fix extraction artifacts, collapse blanks."""
     lines = []
@@ -309,8 +336,14 @@ def build_documents() -> list[dict]:
         ("DPDP_Rules_2025_clean.txt", "DPDP Rules 2025", "rules"),
     ]
     for filename, source, doc_type in sources:
-        raw = (config.TEXT_DIR / filename).read_text(encoding="utf-8")
-        for unit in _split_units(clean(raw), source, doc_type):
+        raw = clean((config.TEXT_DIR / filename).read_text(encoding="utf-8"))
+        if doc_type == "rules":
+            # Index the Rules as corrected, so retrieval returns the operative
+            # wording rather than the wording plus a separate patch note.
+            raw, applied = apply_corrigenda(raw)
+            print(f"[corrigenda] applied {len(applied)}/{len(CORRIGENDA)} "
+                  f"corrections to {source}")
+        for unit in _split_units(raw, source, doc_type):
             _emit(docs, parts, source, doc_type, unit.unit_id, 1, unit.text)
 
     # Draft rules: same structure as the final rules, labelled as a draft.

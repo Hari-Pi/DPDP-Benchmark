@@ -313,7 +313,7 @@
       <li class="flex gap-2"><span class="text-primary">&bull;</span>
         Answers are grounded in the retrieved passages only, with section- and rule-level citations.</li>
       <li class="flex gap-2"><span class="text-primary">&bull;</span>
-        Runs locally against Ollama — the corpus and your questions stay on this machine.</li>
+        Served from a private RAG stack — the corpus and Ollama run on the host server; your access token never leaves your browser.</li>
     </ul>
     <div role="alert" class="alert alert-warning mt-4 text-sm">
       <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none"
@@ -325,6 +325,28 @@
     <div class="modal-action">
       <form method="dialog"><button class="btn btn-primary btn-sm">Got it</button></form>
     </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+<!-- ======================= Access token ======================= -->
+<dialog id="tokenModal" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box border border-base-300">
+    <h3 class="font-serif-brand text-lg font-semibold">Access token</h3>
+    <p class="mt-2 text-sm leading-relaxed text-base-content/75">
+      This assistant is private. Enter the access token you were given to start chatting.
+    </p>
+    <p id="tokenError" class="mt-2 hidden text-sm font-medium text-error">
+      That token was rejected — check it and try again.
+    </p>
+    <form id="tokenForm" class="mt-4 flex gap-2">
+      <input id="tokenInput" type="password" autocomplete="off" spellcheck="false"
+             class="input input-bordered input-sm flex-1 font-mono" placeholder="access token">
+      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+    </form>
+    <p class="mt-2 text-[0.7rem] text-base-content/45">
+      Stored only in this browser (localStorage) and sent as a header with each question.
+    </p>
   </div>
   <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>

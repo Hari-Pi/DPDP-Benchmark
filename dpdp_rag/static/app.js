@@ -19,6 +19,52 @@ const toBottomBtn = $('toBottom');
 let history = [];               // [{role, content}] — trimmed to the last few turns
 let busy = false;
 
+/* ---------------------------------------------------------- access token */
+
+const tokenModal = $('tokenModal');
+const tokenInput = $('tokenInput');
+
+function getToken() {
+  try { return localStorage.getItem('dpdp.token') || ''; } catch (e) { return ''; }
+}
+
+function saveToken(t) {
+  try {
+    if (t) localStorage.setItem('dpdp.token', t);
+    else localStorage.removeItem('dpdp.token');
+  } catch (e) {}
+}
+
+function openTokenModal(rejected) {
+  $('tokenError').classList.toggle('hidden', !rejected);
+  tokenInput.value = '';
+  tokenModal.showModal();
+  tokenInput.focus();
+}
+
+let tokenRequired = false;
+
+/** The /auth/check endpoint is open and tells us whether the server is
+    running in token-gated mode, so first-time visitors are only asked when
+    it actually matters. */
+async function checkAuth() {
+  try {
+    const res = await fetch('/auth/check', { cache: 'no-store' });
+    const d = await res.json();
+    tokenRequired = !!d.token_required;
+    if (tokenRequired && !getToken()) openTokenModal(false);
+  } catch (e) { /* offline — the status pill already shows it */ }
+}
+
+$('tokenForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const t = tokenInput.value.trim();
+  if (!t) return;
+  saveToken(t);
+  tokenModal.close();
+  toast('Token saved');
+});
+
 /* ------------------------------------------------------------------ theme */
 
 function applyTheme(dark) {
@@ -465,7 +511,10 @@ async function submitQuestion(question, opts) {
   try {
     const res = await fetch('/ask', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getToken() ? { 'X-DPDP-Token': getToken() } : {}),
+      },
       body: JSON.stringify({
         question: question,
         history: history,
@@ -473,6 +522,11 @@ async function submitQuestion(question, opts) {
         model: settings.model,
       }),
     });
+    if (res.status === 401) {
+      saveToken('');
+      openTokenModal(true);
+      throw new Error('Access token required — enter the token to continue.');
+    }
     if (!res.ok) {
       let detail = 'HTTP ' + res.status + ' ' + res.statusText;
       try {
@@ -589,3 +643,4 @@ autoGrow();
 qEl.focus();
 pingHealth();
 setInterval(pingHealth, 30000);
+checkAuth();

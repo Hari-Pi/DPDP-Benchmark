@@ -3,6 +3,7 @@ import math
 import re
 import time
 from collections import Counter
+from datetime import date
 
 import chromadb
 from ollama import Client
@@ -14,6 +15,24 @@ _STOP = {"the", "and", "for", "must", "how", "what", "which", "does", "did",
          "can", "may", "within", "into", "under", "any", "its", "their"}
 
 _BM25_K1, _BM25_B = 1.5, 0.75
+
+# How much weight a source's rank carries, by what it is. The corpus mixes the
+# law in force with superseded drafts, a consultation record and a third-party
+# explainer; the draft Rules alone are the largest source in it, so without
+# this they crowd out the operative text. A graded weight demotes them while
+# still letting them win when they are plainly what was asked about — unlike
+# the previous hard tier split, which ordered every tier-1 chunk ahead of
+# every tier-2 one and in practice only ever demoted the FAQ.
+AUTHORITY = {
+    "act": 1.0,             # the Act as in force
+    "rules": 1.0,           # the Rules as corrected
+    "notification": 1.0,    # commencement / establishment notifications
+    "corrigendum": 1.0,     # corrections to the Rules
+    "parliament_qa": 0.9,   # official, but secondary reporting
+    "summary": 0.8,         # consultation record, not law
+    "faq": 0.7,             # third-party explainer
+    "draft_rules": 0.65,    # superseded by the final Rules
+}
 
 # Prompt budgeting. num_ctx has to cover the system prompt, history, retrieved
 # context and the generated answer; anything over the limit is dropped by
@@ -52,11 +71,6 @@ def _tokenize(text: str) -> list[str]:
     return [_stem(t) for t in
             re.findall(r"[a-z][a-z\-]{2,}|\d{2,}", text.lower())
             if t not in _STOP]
-
-
-def _keywords(question: str) -> set[str]:
-    words = re.findall(r"[a-z][a-z\-]{2,}|\d{2,}", question.lower())
-    return {w for w in words if w not in _STOP}
 
 
 def _bm25_search(question: str, n: int) -> list[dict]:
@@ -109,17 +123,9 @@ def _stem(w: str) -> str:
     return w
 
 
-def _kw_score(kws: set[str], text: str) -> float:
-    if not kws:
-        return 0.0
-    doc_tokens = {_stem(t) for t in
-                  re.findall(r"[a-z][a-z\-]{2,}|\d{2,}", text.lower())}
-    hit = sum(1 for k in kws if _stem(k) in doc_tokens)
-    return hit / len(kws)
-
-SYSTEM_PROMPT = """You are a legal research assistant specialised in India's
-Digital Personal Data Protection Act, 2023 (DPDP Act) and the Digital Personal
-Data Protection Rules, 2025 (DPDP Rules).
+SYSTEM_PROMPT_TEMPLATE = """You are a legal research assistant specialised in
+India's Digital Personal Data Protection Act, 2023 (DPDP Act) and the Digital
+Personal Data Protection Rules, 2025 (DPDP Rules).
 
 Rules:
 - Answer ONLY from the provided context. If the context does not contain the
@@ -130,28 +136,37 @@ Rules:
 - Quote key phrases verbatim where useful.
 - Do not provide legal advice; note that this is general legal information.
 
-Commencement status (verified as of September 2026 — state this when asked
-about what is in force, citing the commencement notification G.S.R. 843(E)
-and Rule 1 of the DPDP Rules):
-- In force since 13 Nov 2025: Board framework — ss. 1(2), 2, 18-26, 35, 38-43,
-  44(1),(3) of the Act; Rules 1, 2, 17-21.
-- In force 13 Nov 2026: Consent Manager registration (s. 6(9), s. 27(1)(d);
-  Rule 4).
-- In force 13 May 2027: substantive obligations — ss. 3-5, 6(1)-(8),(10),
-  7-17, 27 (except 27(1)(d)), 28-34, 36-37, 44(2); Rules 3, 5-16, 22-23.
-- The DPDP Rules text stands as corrected by corrigendum G.S.R. 892(E)
-  (10 Dec 2025). If a context chunk includes corrigendum notes, prefer the
-  corrected wording and mention the correction.
-- As of September 2026: Board Chairperson/Members advertised (Jun 2026) but
-  not yet appointed; no Significant Data Fiduciaries notified; press reports
-  of a shorter 12-month compliance window are PROPOSALS ONLY, not law.
-- The IT (SPDI) Rules 2011 remain in force until 13 May 2027.
+Working out what is in force:
+- Today's date is {today}.
+- The commencement notification G.S.R. 843(E) sets the trigger dates as
+  offsets from its own publication, and Rule 1 does the same for the Rules.
+  Where a passage gives an offset ("one year", "eighteen months"), work the
+  calendar date out from the publication date in that passage and show it.
+- The draft Rules are superseded. Prefer the DPDP Rules 2025 for the law as
+  made, and say so when a passage is from the draft.
+- Answer from the context even where it conflicts with anything you recall
+  from training; the retrieved gazette text is authoritative here.
 """
+
+
+def system_prompt() -> str:
+    """The prompt carries behaviour and today's date only.
+
+    It used to also state which provisions were in force on which dates, the
+    Board's appointment status and so on. That was ungrounded (the model
+    could not cite it), it went stale the moment it was written, and it let
+    the commencement benchmark cases pass on memorisation rather than on
+    retrieval. All of it is in the corpus as primary source — the schedule in
+    G.S.R. 843(E) and Rule 1, the Board's status in the Lok Sabha answers.
+    """
+    return SYSTEM_PROMPT_TEMPLATE.format(today=date.today().strftime("%d %B %Y"))
+
 
 
 def _hybrid_rerank(question: str, dense: list[dict], bm25: list[dict],
                    k: int) -> list[dict]:
-    """Fuse dense and BM25 rankings, then prefer official (Tier-1) sources."""
+    """Fuse dense and BM25 rankings, then weight each hit by how
+    authoritative its source is (see AUTHORITY)."""
     by_id = {}
     for rank, h in enumerate(dense):
         h = dict(h)
@@ -168,12 +183,9 @@ def _hybrid_rerank(question: str, dense: list[dict], bm25: list[dict],
     for h in hits:
         dense_score = 1 - h.get("dense_rank", nd) / nd
         bm25_score = 1 - h.get("bm25_rank", nb) / nb
-        h["kw"] = _kw_score(_keywords(question), h["text"])
-        h["score"] = 0.55 * dense_score + 0.45 * bm25_score
-    tier1 = [h for h in hits if h["meta"].get("tier", 1) == 1]
-    tier2 = [h for h in hits if h["meta"].get("tier", 1) != 1]
-    ranked = sorted(tier1, key=lambda h: -h["score"]) + \
-        sorted(tier2, key=lambda h: -h["score"])
+        h["authority"] = AUTHORITY.get(h["meta"].get("doc_type"), 0.8)
+        h["score"] = (0.55 * dense_score + 0.45 * bm25_score) * h["authority"]
+    ranked = sorted(hits, key=lambda h: -h["score"])
     return ranked[:k]
 
 
@@ -253,8 +265,9 @@ def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
     hits = retrieve(question, k)
     history = history or []
 
+    prompt = system_prompt()
     budget = (config.NUM_CTX - config.MAX_OUTPUT_TOKENS - CTX_SAFETY
-              - _tokens(SYSTEM_PROMPT) - _tokens(question))
+              - _tokens(prompt) - _tokens(question))
     kept_history = _fit_history(history, int(max(budget, 0) * HISTORY_SHARE))
     budget -= sum(_tokens(m["content"]) + MSG_OVERHEAD for m in kept_history)
     kept = _fit_context(hits, budget)
@@ -264,7 +277,7 @@ def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
               f"passages, {len(kept_history)}/{len(history)} history messages")
 
     context = build_context(kept)
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages = [{"role": "system", "content": prompt}]
     messages.extend(kept_history)
     messages.append({
         "role": "user",
