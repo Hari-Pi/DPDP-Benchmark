@@ -145,10 +145,10 @@ def _load_existing() -> dict:
     return {}
 
 
-def run(k: int, skip_llm: bool) -> None:
+def run(k: int, skip_llm: bool, resume: bool) -> None:
     out = Path(__file__).resolve().parent.parent / "benchmark_results.json"
     results = []
-    if not skip_llm:
+    if not skip_llm and resume:
         prev = _load_existing()
         if prev:
             print(f"resuming: {len(prev)} case(s) already complete, "
@@ -202,5 +202,9 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--k", type=int, default=10)
     p.add_argument("--retrieval-only", action="store_true")
+    p.add_argument("--resume", action="store_true",
+                   help="keep completed cases from a previous run instead of "
+                        "re-running them (off by default, so a code change is "
+                        "never measured against stale results)")
     args = p.parse_args()
-    run(args.k, skip_llm=args.retrieval_only)
+    run(args.k, skip_llm=args.retrieval_only, resume=args.resume)

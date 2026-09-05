@@ -14,6 +14,14 @@ _STOP = {"the", "and", "for", "must", "how", "what", "which", "does", "did",
          "can", "may", "within", "into", "under", "any", "its", "their"}
 
 _BM25_K1, _BM25_B = 1.5, 0.75
+
+# Prompt budgeting. num_ctx has to cover the system prompt, history, retrieved
+# context and the generated answer; anything over the limit is dropped by
+# Ollama without warning, so we trim deliberately instead.
+CTX_SAFETY = 192        # slack for chat-template scaffolding
+MSG_OVERHEAD = 8        # per-message role/delimiter tokens
+BLOCK_OVERHEAD = 12     # per-passage separator and citation header
+HISTORY_SHARE = 0.25    # cap on the share of the budget history may take
 _bm25_cache: dict = {"size": None, "docs": None, "df": None, "avgdl": 0.0}
 
 
@@ -189,22 +197,75 @@ def retrieve(question: str, k: int = config.TOP_K) -> list[dict]:
     return _hybrid_rerank(question, dense, bm25, k)
 
 
+def _block(hit: dict, n: int = 0) -> str:
+    """Render one context passage. Shared with the budget so what we measure
+    is exactly what we send."""
+    m = hit["meta"]
+    return f"[{n}] {m['source']}, {m['unit']}\n{hit['text']}"
+
+
 def build_context(hits: list[dict]) -> str:
-    blocks = []
-    for i, h in enumerate(hits, 1):
-        m = h["meta"]
-        blocks.append(f"[{i}] {m['source']}, {m['unit']}\n{h['text']}")
-    return "\n\n---\n\n".join(blocks)
+    return "\n\n---\n\n".join(_block(h, i) for i, h in enumerate(hits, 1))
+
+
+def _tokens(text: str) -> int:
+    """Rough token count. Gazette text packs numbers, brackets and section
+    references, so it tokenises denser than prose — estimate conservatively."""
+    return int(len(text) / 3.4) + 1
+
+
+def _fit_history(history: list[dict], budget: int) -> list[dict]:
+    """Keep the most recent whole turns that fit the budget."""
+    kept, used = [], 0
+    for msg in reversed(history):
+        cost = _tokens(msg["content"]) + MSG_OVERHEAD
+        if used + cost > budget:
+            break
+        kept.append(msg)
+        used += cost
+    kept.reverse()
+    if kept and kept[0]["role"] == "assistant":
+        kept = kept[1:]     # never open on a reply whose question was trimmed
+    return kept
+
+
+def _fit_context(hits: list[dict], budget: int) -> list[dict]:
+    """Keep the highest-ranked hits that fit, always keeping at least one."""
+    kept, used = [], 0
+    for h in hits:
+        cost = _tokens(_block(h)) + BLOCK_OVERHEAD
+        if kept and used + cost > budget:
+            break
+        kept.append(h)
+        used += cost
+    return kept
 
 
 def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
            history: list[dict] | None = None) -> tuple[str, list[dict]]:
-    """Return the generated answer and the hits used, so callers can cite."""
+    """Return the generated answer and the hits actually used, so callers cite
+    only what the model saw.
+
+    The prompt is fitted to num_ctx before sending: Ollama truncates silently,
+    so an over-long prompt would quietly drop the system instructions or the
+    earliest context instead of failing.
+    """
     hits = retrieve(question, k)
-    context = build_context(hits)
+    history = history or []
+
+    budget = (config.NUM_CTX - config.MAX_OUTPUT_TOKENS - CTX_SAFETY
+              - _tokens(SYSTEM_PROMPT) - _tokens(question))
+    kept_history = _fit_history(history, int(max(budget, 0) * HISTORY_SHARE))
+    budget -= sum(_tokens(m["content"]) + MSG_OVERHEAD for m in kept_history)
+    kept = _fit_context(hits, budget)
+
+    if len(kept) < len(hits) or len(kept_history) < len(history):
+        print(f"[budget] num_ctx={config.NUM_CTX}: kept {len(kept)}/{len(hits)} "
+              f"passages, {len(kept_history)}/{len(history)} history messages")
+
+    context = build_context(kept)
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    if history:
-        messages.extend(history)
+    messages.extend(kept_history)
     messages.append({
         "role": "user",
         "content": f"Context:\n\n{context}\n\nQuestion: {question}",
@@ -215,4 +276,4 @@ def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
             options={"temperature": 0.1, "num_ctx": config.NUM_CTX,
                      "num_predict": config.MAX_OUTPUT_TOKENS}),
         what="chat completion")
-    return resp["message"]["content"], hits
+    return resp["message"]["content"], kept

@@ -6,6 +6,7 @@ boundaries: sections for the Act, rules and schedules for the Rules.
 Each unit keeps structured metadata so the chatbot can cite precisely.
 """
 import re
+from collections import defaultdict
 from dataclasses import dataclass
 
 from . import config
@@ -123,6 +124,16 @@ def _split_units(text: str, source: str, doc_type: str) -> list[Unit]:
                           "\n\n".join(u.text for u in sched))
             units = [u for u in units if u.unit_id != "THE SCHEDULE"]
             units.append(merged)
+            sched = [merged]
+
+        # Rebuild the penalty table as one unit per entry, so each breach
+        # travels with its own penalty amount.
+        if sched:
+            rows = _penalty_schedule_rows(sched[0].text)
+            if rows:
+                units = [u for u in units if u.unit_id != "THE SCHEDULE"]
+                units.extend(Unit(sched[0].source, sched[0].doc_type,
+                                  "THE SCHEDULE", r) for r in rows)
 
     # Split large schedules at PART A / PART B boundaries so retrieval can
     # target individual parts precisely.
@@ -142,6 +153,86 @@ def _split_units(text: str, source: str, doc_type: str) -> list[Unit]:
             part_units.append(u)
     units = part_units
     return units
+
+
+def _sentences(block: str) -> list[str]:
+    """Flatten wrapped lines, then split on sentence ends."""
+    flat = re.sub(r"\s+", " ", block).strip()
+    return [s.strip() for s in re.split(r"(?<=\.)\s+", flat) if s.strip()]
+
+
+def _penalty_schedule_rows(text: str) -> list[str] | None:
+    """Re-join the Act's penalty Schedule, which extracts column-by-column.
+
+    The gazette PDF yields every breach description first, then the serial
+    numbers, then every penalty amount — so a breach and its penalty land in
+    different chunks and no retrieval can associate them. Return one string
+    per entry, or None if the layout is not the one we know how to repair.
+    """
+    sl = re.search(r"^\s*Sl\.\s*No\.\s*$", text, re.M)
+    pen = re.search(r"^\s*Penalty\s*$", text, re.M)
+    if not sl or not pen or not (sl.start() < pen.start()):
+        return None
+
+    caption = ""
+    cap = re.search(r"^\s*\[See section[^\]]*\]", text[pen.end():], re.M)
+    if cap:
+        caption = re.sub(r"\s+", " ", cap.group(0)).strip()
+
+    def strip_headers(block: str, drop_first: bool) -> str:
+        lines = [ln for ln in block.splitlines() if ln.strip()]
+        if drop_first and lines:
+            lines = lines[1:]                       # the column caption
+        lines = [ln for ln in lines if not re.fullmatch(r"\s*\(\d\)\s*", ln)]
+        return "\n".join(lines)
+
+    breaches = _sentences(strip_headers(text[:sl.start()], True))
+    numbers = re.findall(r"^\s*(\d{1,2})\.\s*$", text[sl.start():pen.start()], re.M)
+
+    tail = text[pen.end():]
+    end = re.search(r"^\s*THE\s+SCHEDULE\s*$", tail, re.M)
+    penalties = _sentences(strip_headers(tail[: end.start()] if end else tail, False))
+
+    if not numbers or not (len(breaches) == len(penalties) == len(numbers)):
+        return None
+
+    head = f"THE SCHEDULE {caption}".strip()
+    return [f"{head}\nEntry {n}. Breach: {b}\nPenalty: {p}"
+            for n, b, p in zip(numbers, breaches, penalties)]
+
+
+def _schedule_rows(text: str) -> list[str] | None:
+    """Split a numbered schedule table into its caption plus one item per row."""
+    starts = [m.start() for m in re.finditer(r"^\s*\d{1,2}\.\s", text, re.M)]
+    if len(starts) < 2:
+        return None
+    bounds = starts + [len(text)]
+    rows = [text[a:b].strip() for a, b in zip(starts, bounds[1:])]
+    return [text[: starts[0]].strip()] + [r for r in rows if r]
+
+
+def chunk_schedule(text: str, size: int = config.CHUNK_SIZE) -> list[str]:
+    """Chunk a schedule without ever cutting a row in half.
+
+    Rows are packed up to `size`, and the schedule caption (its title, the
+    "[See rule N]" reference and the column names) rides along with every
+    chunk so a row is never stranded without its column headings.
+    """
+    rows = _schedule_rows(text)
+    if not rows:
+        return chunk(text)
+    caption, rows = rows[0][:300], rows[1:]
+    budget = max(size - len(caption), size // 2)   # the caption rides along
+    chunks, cur = [], ""
+    for row in rows:
+        for piece in _split_long(row, budget):
+            if cur and len(cur) + len(piece) > budget:
+                chunks.append(cur.strip())
+                cur = ""
+            cur = (cur + "\n" + piece) if cur else piece
+    if cur.strip():
+        chunks.append(cur.strip())
+    return [f"{caption}\n{c}" if caption else c for c in chunks]
 
 
 def _split_long(p: str, size: int) -> list[str]:
@@ -195,9 +286,24 @@ def _doc(source: str, doc_type: str, unit: str, tier: int, part: int,
     }
 
 
+def _is_schedule(unit_id: str) -> bool:
+    return "SCHEDULE" in unit_id.upper()
+
+
+def _emit(docs: list[dict], parts: dict, source: str, doc_type: str,
+          unit_id: str, tier: int, text: str) -> None:
+    """Chunk one unit and append it, numbering parts per (doc_type, unit)."""
+    pieces = chunk_schedule(text) if _is_schedule(unit_id) else chunk(text)
+    for piece in pieces:
+        key = (doc_type, unit_id)
+        docs.append(_doc(source, doc_type, unit_id, tier, parts[key], piece))
+        parts[key] += 1
+
+
 def build_documents() -> list[dict]:
     """Return all chunks with metadata, ready for embedding."""
-    docs = []
+    docs: list[dict] = []
+    parts: dict = defaultdict(int)
     sources = [
         ("DPDP_Act_2023.txt", "DPDP Act 2023", "act"),
         ("DPDP_Rules_2025_clean.txt", "DPDP Rules 2025", "rules"),
@@ -205,8 +311,7 @@ def build_documents() -> list[dict]:
     for filename, source, doc_type in sources:
         raw = (config.TEXT_DIR / filename).read_text(encoding="utf-8")
         for unit in _split_units(clean(raw), source, doc_type):
-            for i, piece in enumerate(chunk(unit.text)):
-                docs.append(_doc(source, doc_type, unit.unit_id, 1, i, piece))
+            _emit(docs, parts, source, doc_type, unit.unit_id, 1, unit.text)
 
     # Draft rules: same structure as the final rules, labelled as a draft.
     draft_path = config.OFFICIAL_TEXT_DIR / "Draft_Rules_Gazette_GSR_02E.txt"
@@ -215,8 +320,7 @@ def build_documents() -> list[dict]:
     for unit in _split_units(raw, draft_source, "draft_rules"):
         uid = (f"draft {unit.unit_id}" if unit.unit_id.startswith("r.")
                else unit.unit_id)
-        for i, piece in enumerate(chunk(unit.text)):
-            docs.append(_doc(draft_source, "draft_rules", uid, 1, i, piece))
+        _emit(docs, parts, draft_source, "draft_rules", uid, 1, unit.text)
 
     # Smaller official documents: single or paragraph chunks.
     simple_docs = [
@@ -247,6 +351,5 @@ def build_documents() -> list[dict]:
     ]
     for filename, source, doc_type, unit, tier in simple_docs:
         raw = clean((config.OFFICIAL_TEXT_DIR / filename).read_text(encoding="utf-8"))
-        for i, piece in enumerate(chunk(raw)):
-            docs.append(_doc(source, doc_type, unit, tier, i, piece))
+        _emit(docs, parts, source, doc_type, unit, tier, raw)
     return docs
