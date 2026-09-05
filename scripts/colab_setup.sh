@@ -60,9 +60,9 @@ python -m dpdp_rag.ingest
 log "[6/7] Benchmark (resumable)"
 python scripts/benchmark.py --k 8
 
-# --- 7. Export index --------------------------------------------------------------
-log "[7/7] Pack the built index for local serving"
-python scripts/export_index.py
+# --- 7. Bundle -----------------------------------------------------------------
+log "[7/7] Pack dpdp_bundle.zip for local serving"
+python scripts/bundle.py
 
 log "DONE — summary:"
 python scripts/progress.py
