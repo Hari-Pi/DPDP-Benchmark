@@ -224,7 +224,8 @@
 
   <!-- ======================= Conversation ======================= -->
   <main id="scroller" class="app-bg relative flex-1 overflow-y-auto">
-    <div id="chat" class="mx-auto w-full max-w-3xl space-y-5 px-4 py-6 sm:py-8"></div>
+    <div id="chat" role="log" aria-live="polite" aria-relevant="additions text"
+         class="mx-auto w-full max-w-3xl space-y-5 px-4 py-6 sm:py-8"></div>
   </main>
 
   <button id="toBottom"

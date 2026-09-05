@@ -18,7 +18,6 @@ const toBottomBtn = $('toBottom');
 
 let history = [];               // [{role, content}] — trimmed to the last few turns
 let busy = false;
-let lastQuestion = null;
 
 /* ------------------------------------------------------------------ theme */
 
@@ -226,18 +225,25 @@ function sourcesBlock(sources) {
   return wrap;
 }
 
-function actionButton(label, paths, onClick) {
+function actionButton(label, paths, onClick, extraClass) {
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = 'btn btn-ghost btn-xs gap-1 text-base-content/55 hover:text-base-content';
+  b.className = 'btn btn-ghost btn-xs gap-1 text-base-content/55 hover:text-base-content' +
+                (extraClass ? ' ' + extraClass : '');
   b.appendChild(icon(paths, 'size-3.5'));
   b.appendChild(document.createTextNode(label));
   b.addEventListener('click', onClick);
   return b;
 }
 
+/** Retry rewrites the last turn, so it may only ever sit on the newest one. */
+function dropStaleRetryButtons() {
+  chatEl.querySelectorAll('.js-retry').forEach((b) => b.remove());
+}
+
 /** Assistant card: avatar, markdown answer, sources, footer actions. */
 function addAssistantMessage(text, sources, meta) {
+  dropStaleRetryButtons();
   const row = document.createElement('div');
   row.className = 'rise flex gap-3';
   row.appendChild(botAvatar());
@@ -261,8 +267,8 @@ function addAssistantMessage(text, sources, meta) {
   }));
   if (meta && meta.question) {
     footer.appendChild(actionButton('Retry', ICON_REFRESH, () => {
-      if (!busy) submitQuestion(meta.question, { replaceLast: true });
-    }));
+      if (!busy) submitQuestion(meta.question, { replaceLast: true, dropTurn: true });
+    }, 'js-retry'));
   }
   if (meta && meta.seconds) {
     const t = document.createElement('span');
@@ -278,12 +284,13 @@ function addAssistantMessage(text, sources, meta) {
 }
 
 function addErrorMessage(message, question) {
+  dropStaleRetryButtons();
   const row = document.createElement('div');
   row.className = 'rise flex gap-3';
   row.appendChild(botAvatar());
   const box = document.createElement('div');
-  box.className = 'min-w-0 flex-1 rounded-2xl rounded-tl-md border border-error/30 ' +
-                  'bg-error/10 px-4 py-3.5';
+  box.className = 'min-w-0 flex-1 rounded-2xl rounded-tl-md border border-error/40 ' +
+                  'bg-error/12 px-4 py-3.5';
   const head = document.createElement('p');
   head.className = 'text-sm font-semibold text-error';
   head.textContent = 'Request failed';
@@ -299,7 +306,7 @@ function addErrorMessage(message, question) {
     bar.className = 'mt-2';
     bar.appendChild(actionButton('Retry', ICON_REFRESH, () => {
       if (!busy) submitQuestion(question, { replaceLast: true });
-    }));
+    }, 'js-retry'));
     box.appendChild(bar);
   }
   row.appendChild(box);
@@ -353,7 +360,7 @@ const EXTRA_PROMPTS = [
 
 function renderEmptyState() {
   const wrap = document.createElement('div');
-  wrap.className = 'rise py-6 sm:py-10';
+  wrap.className = 'js-empty-state rise py-6 sm:py-10';
 
   const badge = document.createElement('div');
   badge.className = 'mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 ' +
@@ -437,20 +444,21 @@ async function submitQuestion(question, opts) {
   opts = opts || {};
 
   if (opts.replaceLast) {
-    // Drop the failed/unwanted answer and the question that produced it.
+    // Drop the answer being replaced and the question that produced it. Only
+    // the newest turn carries a Retry button, so this always lines up.
     if (chatEl.lastElementChild) chatEl.lastElementChild.remove();
     if (chatEl.lastElementChild) chatEl.lastElementChild.remove();
-    history = history.slice(0, -2);
-  } else if (chatEl.firstElementChild && chatEl.children.length === 1 &&
-             chatEl.firstElementChild.querySelector('h2')) {
-    chatEl.innerHTML = '';      // clear the empty state on the first question
+    // A failed turn was never recorded, so only a real answer is un-recorded
+    // here — otherwise the retry would eat the preceding successful turn.
+    if (opts.dropTurn) history = history.slice(0, -2);
   }
+  const empty = chatEl.querySelector('.js-empty-state');
+  if (empty) empty.remove();
 
-  lastQuestion = question;
   addUserMessage(question);
-  scrollToBottom(true);
 
   const pending = addPending();
+  scrollToBottom(true);
   setBusy(true);
   const started = performance.now();
 
@@ -547,7 +555,6 @@ document.addEventListener('click', (e) => {
 
 $('clearBtn').addEventListener('click', () => {
   history = [];
-  lastQuestion = null;
   chatEl.innerHTML = '';
   renderEmptyState();
   scroller.scrollTop = 0;
