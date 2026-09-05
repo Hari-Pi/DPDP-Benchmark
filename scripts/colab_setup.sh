@@ -57,8 +57,12 @@ python scripts/extract_text.py
 python -m dpdp_rag.ingest
 
 # --- 6. Benchmark ---------------------------------------------------------------
-log "[6/6] Benchmark (resumable)"
+log "[6/7] Benchmark (resumable)"
 python scripts/benchmark.py --k 8
+
+# --- 7. Export index --------------------------------------------------------------
+log "[7/7] Pack the built index for local serving"
+python scripts/export_index.py
 
 log "DONE — summary:"
 python scripts/progress.py
