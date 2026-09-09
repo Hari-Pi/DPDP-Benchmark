@@ -32,12 +32,28 @@ class JobStoreTests(unittest.TestCase):
                 "colab-1", worker_kind="colab", pc_available=True))
             claimed = store.claim_next("pc-1", worker_kind="pc")
             self.assertEqual(claimed["id"], job["id"])
+            self.assertEqual(claimed["progress"], 5)
+
+            working = store.update_progress(
+                job["id"], "pc-1", progress=42,
+                stage="Searching semantic matches",
+            )
+            self.assertEqual(working["progress"], 42)
+            self.assertEqual(working["stage"], "Searching semantic matches")
+            # Late/out-of-order events cannot move the bar backwards.
+            self.assertEqual(store.update_progress(
+                job["id"], "pc-1", progress=20, stage="Still working",
+            )["progress"], 42)
 
             store.retry_on_colab(job["id"], "PC model unavailable")
             self.assertIsNone(store.claim_next("pc-1", worker_kind="pc"))
             fallback = store.claim_next(
                 "colab-1", worker_kind="colab", pc_available=True)
             self.assertEqual(fallback["id"], job["id"])
+            completed = store.complete(
+                fallback["id"], answer="done", sources=[])
+            self.assertEqual(completed["progress"], 100)
+            self.assertEqual(completed["stage"], "Complete")
 
     def test_pc_disconnect_marks_job_for_colab(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -385,7 +385,7 @@ function addErrorMessage(message, question) {
   return row;
 }
 
-/** Skeleton shown while the model retrieves and generates. */
+/** Live stage and percentage reported by the compute worker. */
 function addPending() {
   const row = document.createElement('div');
   row.className = 'rise flex gap-3';
@@ -393,25 +393,36 @@ function addPending() {
   const card = document.createElement('div');
   card.className = 'min-w-0 flex-1 rounded-2xl rounded-tl-md border border-base-300 ' +
                    'bg-base-100 px-4 py-3.5 shadow-sm';
+  const status = document.createElement('div');
+  status.className = 'flex items-center gap-3';
   const label = document.createElement('p');
-  label.className = 'shimmer text-sm font-medium';
-  label.textContent = 'Searching the gazette texts…';
-  const bars = document.createElement('div');
-  bars.className = 'mt-3 space-y-2';
-  ['w-full', 'w-11/12', 'w-8/12'].forEach((w) => {
-    const s = document.createElement('div');
-    s.className = 'skeleton h-3 ' + w;
-    bars.appendChild(s);
-  });
-  card.append(label, bars);
+  label.className = 'js-progress-label min-w-0 flex-1 text-sm font-medium';
+  label.textContent = 'Submitting request…';
+  const percent = document.createElement('span');
+  percent.className = 'js-progress-percent font-mono text-xs text-base-content/55';
+  percent.textContent = '0%';
+  status.append(label, percent);
+  const bar = document.createElement('progress');
+  bar.className = 'js-progress-bar progress progress-primary mt-3 h-2 w-full';
+  bar.max = 100;
+  bar.value = 0;
+  const hint = document.createElement('p');
+  hint.className = 'mt-2 text-xs text-base-content/50';
+  hint.textContent = 'Progress updates come directly from the active worker.';
+  card.append(status, bar, hint);
   row.appendChild(card);
   chatEl.appendChild(row);
   return row;
 }
 
-function pendingStatus(row, text) {
-  const label = row && row.querySelector('p');
+function pendingStatus(row, text, progress) {
+  const label = row && row.querySelector('.js-progress-label');
   if (label) label.textContent = text;
+  const value = Math.max(0, Math.min(100, Number(progress) || 0));
+  const bar = row && row.querySelector('.js-progress-bar');
+  const percent = row && row.querySelector('.js-progress-percent');
+  if (bar) bar.value = value;
+  if (percent) percent.textContent = Math.round(value) + '%';
 }
 
 async function waitForJob(jobId, pending) {
@@ -430,9 +441,13 @@ async function waitForJob(jobId, pending) {
     if (job.status === 'failed' || job.status === 'cancelled') {
       throw new Error(job.error || 'The request was ' + job.status + '.');
     }
-    pendingStatus(pending, job.status === 'running'
-      ? 'Colab worker is answering…'
-      : 'Waiting for a Colab worker…');
+    pendingStatus(
+      pending,
+      job.stage || (job.status === 'running'
+        ? 'Compute worker is answering…'
+        : 'Waiting for a compute worker…'),
+      job.progress,
+    );
     await new Promise((resolve) => setTimeout(resolve, 1200));
   }
   throw new Error('The request timed out while waiting for the worker.');
@@ -588,7 +603,7 @@ async function submitQuestion(question, opts) {
     }
     const accepted = await res.json();
     if (!accepted.job_id) throw new Error('The coordinator did not return a job id.');
-    pendingStatus(pending, 'Waiting for a compute worker…');
+    pendingStatus(pending, 'Queued · waiting for a compute worker…', 2);
     const data = await waitForJob(accepted.job_id, pending);
     pending.remove();
     addAssistantMessage(data.answer, data.sources, {

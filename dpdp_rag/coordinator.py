@@ -92,6 +92,8 @@ def _job_response(job: dict) -> dict:
         "answer": job.get("answer"),
         "sources": job.get("sources", []),
         "error": job.get("error"),
+        "progress": job.get("progress", 0),
+        "stage": job.get("stage", "Queued"),
         "created_at": job["created_at"],
         "updated_at": job["updated_at"],
     }
@@ -246,6 +248,14 @@ async def worker_socket(websocket: WebSocket) -> None:
                         websocket.receive_json(), timeout=3600)
                     if message.get("type") == "heartbeat":
                         await websocket.send_json({"type": "heartbeat_ack"})
+                        continue
+                    if (message.get("type") == "progress"
+                            and message.get("job_id") == job["id"]):
+                        store.update_progress(
+                            job["id"], worker_id,
+                            progress=int(message.get("progress", 0)),
+                            stage=str(message.get("stage", "Working")),
+                        )
                         continue
                     if message.get("type") != "result" or message.get("job_id") != job["id"]:
                         continue

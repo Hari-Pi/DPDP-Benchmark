@@ -6,6 +6,7 @@ import threading
 import time
 from collections import Counter
 from datetime import date
+from typing import Callable
 
 import chromadb
 from ollama import Client
@@ -48,6 +49,12 @@ _bm25_lock = threading.Lock()
 _dense_cache: dict = {"size": None, "device": None, "matrix": None,
                       "documents": None, "metadatas": None}
 _dense_lock = threading.Lock()
+ProgressCallback = Callable[[str, int], None]
+
+
+def _report(callback: ProgressCallback | None, stage: str, progress: int) -> None:
+    if callback is not None:
+        callback(stage, progress)
 
 
 def _retry(fn, *, what: str, attempts: int = 5, base_wait: float = 5.0):
@@ -198,15 +205,19 @@ def _hybrid_rerank(question: str, dense: list[dict], bm25: list[dict],
     return ranked[:k]
 
 
-def retrieve(question: str, k: int = config.TOP_K) -> list[dict]:
+def retrieve(question: str, k: int = config.TOP_K,
+             progress: ProgressCallback | None = None) -> list[dict]:
+    _report(progress, "Opening the legal index", 12)
     chroma = chromadb.PersistentClient(path=str(config.DB_DIR))
     col = chroma.get_or_create_collection(
         config.COLLECTION, metadata={"hnsw:space": "cosine"})
+    _report(progress, "Embedding your question on the GPU", 20)
     emb = _retry(
         lambda: _client().embed(
             model=config.EMBED_MODEL,
             input=[f"search_query: {question}"])["embeddings"][0],
         what="embed query")
+    _report(progress, "Searching semantic matches", 30)
     dense = _gpu_dense_search(col, emb, min(max(16, k * 2), col.count() or 16))
     if dense is None:
         res = col.query(query_embeddings=[emb],
@@ -216,7 +227,9 @@ def retrieve(question: str, k: int = config.TOP_K) -> list[dict]:
                  for doc, meta, dist in zip(res["documents"][0],
                                             res["metadatas"][0],
                                             res["distances"][0])]
+    _report(progress, "Checking exact legal terms", 40)
     bm25 = _bm25_search(question, n=max(16, k * 2))
+    _report(progress, "Ranking the strongest sources", 48)
     return _hybrid_rerank(question, dense, bm25, k)
 
 
@@ -327,7 +340,8 @@ def _fit_context(hits: list[dict], budget: int) -> list[dict]:
 
 
 def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
-           history: list[dict] | None = None) -> tuple[str, list[dict]]:
+           history: list[dict] | None = None,
+           progress: ProgressCallback | None = None) -> tuple[str, list[dict]]:
     """Return the generated answer and the hits actually used, so callers cite
     only what the model saw.
 
@@ -335,9 +349,10 @@ def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
     so an over-long prompt would quietly drop the system instructions or the
     earliest context instead of failing.
     """
-    hits = retrieve(question, k)
+    hits = retrieve(question, k, progress=progress)
     history = history or []
 
+    _report(progress, "Building the grounded legal prompt", 55)
     prompt = system_prompt()
     budget = (config.NUM_CTX - config.MAX_OUTPUT_TOKENS - CTX_SAFETY
               - _tokens(prompt) - _tokens(question))
@@ -356,10 +371,28 @@ def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
         "role": "user",
         "content": f"Context:\n\n{context}\n\nQuestion: {question}",
     })
-    resp = _retry(
-        lambda: _client().chat(
-            model=model, messages=messages,
+    def generate() -> str:
+        parts: list[str] = []
+        characters = 0
+        last_progress = 59
+        stream = _client().chat(
+            model=model, messages=messages, stream=True, keep_alive=-1,
             options={"temperature": 0.1, "num_ctx": config.NUM_CTX,
-                     "num_predict": config.MAX_OUTPUT_TOKENS}),
-        what="chat completion")
-    return resp["message"]["content"], kept
+                     "num_predict": config.MAX_OUTPUT_TOKENS},
+        )
+        for chunk in stream:
+            text = chunk["message"].get("content", "")
+            parts.append(text)
+            characters += len(text)
+            estimate = min(96, 60 + int(
+                36 * characters / max(config.MAX_OUTPUT_TOKENS * 4, 1)))
+            if estimate > last_progress:
+                last_progress = estimate
+                _report(progress, f"Writing the grounded answer · ~{characters // 4} tokens",
+                        estimate)
+        return "".join(parts)
+
+    _report(progress, "Starting GPU generation", 60)
+    answer_text = _retry(generate, what="chat completion")
+    _report(progress, "Finalizing citations", 98)
+    return answer_text, kept

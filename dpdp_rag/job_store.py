@@ -69,6 +69,16 @@ class JobStore:
                     "ALTER TABLE jobs ADD COLUMN pc_attempted INTEGER "
                     "NOT NULL DEFAULT 0"
                 )
+            if "progress" not in columns:
+                conn.execute(
+                    "ALTER TABLE jobs ADD COLUMN progress INTEGER "
+                    "NOT NULL DEFAULT 0"
+                )
+            if "stage" not in columns:
+                conn.execute(
+                    "ALTER TABLE jobs ADD COLUMN stage TEXT "
+                    "NOT NULL DEFAULT 'Queued'"
+                )
 
     def create(self, *, question: str, history: list[dict], k: int,
                model: str) -> dict:
@@ -123,9 +133,10 @@ class JobStore:
                 conn.commit()
                 return None
             conn.execute(
-                "UPDATE jobs SET status='running', worker_id=?, updated_at=? "
+                "UPDATE jobs SET status='running', worker_id=?, progress=5, "
+                "stage=?, updated_at=? "
                 "WHERE id=? AND status='queued'",
-                (worker_id, _now(), row["id"]),
+                (worker_id, f"{worker_kind.title()} worker started", _now(), row["id"]),
             )
             conn.commit()
         return self.get(row["id"])
@@ -135,9 +146,22 @@ class JobStore:
         with self._connect() as conn:
             conn.execute(
                 "UPDATE jobs SET status='queued', worker_id=NULL, "
-                "pc_attempted=1, error=?, updated_at=? "
+                "pc_attempted=1, progress=5, "
+                "stage='PC unavailable; waiting for Colab', error=?, updated_at=? "
                 "WHERE id=? AND status='running'",
                 (error[:2000], _now(), job_id),
+            )
+        return self.get(job_id)
+
+    def update_progress(self, job_id: str, worker_id: str, *, progress: int,
+                        stage: str) -> dict | None:
+        """Record monotonic progress reported by the worker holding a job."""
+        value = max(0, min(99, int(progress)))
+        with self._connect() as conn:
+            conn.execute(
+                "UPDATE jobs SET progress=MAX(progress, ?), stage=?, updated_at=? "
+                "WHERE id=? AND status='running' AND worker_id=?",
+                (value, stage[:160], _now(), job_id, worker_id),
             )
         return self.get(job_id)
 
@@ -146,7 +170,8 @@ class JobStore:
         with self._connect() as conn:
             conn.execute(
                 "UPDATE jobs SET status='completed', answer=?, sources_json=?, "
-                "error=NULL, updated_at=? WHERE id=? AND status='running'",
+                "error=NULL, progress=100, stage='Complete', updated_at=? "
+                "WHERE id=? AND status='running'",
                 (answer, json.dumps(sources), _now(), job_id),
             )
         return self.get(job_id)
@@ -154,7 +179,8 @@ class JobStore:
     def fail(self, job_id: str, error: str) -> dict | None:
         with self._connect() as conn:
             conn.execute(
-                "UPDATE jobs SET status='failed', error=?, updated_at=? "
+                "UPDATE jobs SET status='failed', error=?, stage='Failed', "
+                "updated_at=? "
                 "WHERE id=? AND status='running'",
                 (error[:2000], _now(), job_id),
             )
@@ -165,9 +191,13 @@ class JobStore:
         with self._connect() as conn:
             result = conn.execute(
                 "UPDATE jobs SET status='queued', worker_id=NULL, "
-                "pc_attempted=MAX(pc_attempted, ?), updated_at=? "
+                "pc_attempted=MAX(pc_attempted, ?), progress=5, "
+                "stage=?, updated_at=? "
                 "WHERE status='running' AND worker_id=?",
-                (int(pc_attempted), _now(), worker_id),
+                (int(pc_attempted),
+                 "Worker disconnected; waiting for fallback" if pc_attempted
+                 else "Worker disconnected; waiting to reconnect",
+                 _now(), worker_id),
             )
         return result.rowcount
 

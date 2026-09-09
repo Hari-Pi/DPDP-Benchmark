@@ -51,6 +51,44 @@ def sync_artifacts() -> None:
         destination.write_bytes(data)
 
 
+async def process_job(socket, job: dict, query) -> dict:
+    """Run one answer in a thread while forwarding stage updates."""
+    updates: asyncio.Queue[tuple[str, int]] = asyncio.Queue()
+    loop = asyncio.get_running_loop()
+
+    def report(stage: str, progress: int) -> None:
+        loop.call_soon_threadsafe(updates.put_nowait, (stage, progress))
+
+    task = asyncio.create_task(asyncio.to_thread(
+        query.answer, job["question"], k=job["k"], model=job["model"],
+        history=job["history"], progress=report,
+    ))
+    while not task.done():
+        try:
+            stage, progress = await asyncio.wait_for(updates.get(), timeout=1)
+            await socket.send(json.dumps({
+                "type": "progress", "job_id": job["id"],
+                "stage": stage, "progress": progress,
+            }))
+        except asyncio.TimeoutError:
+            continue
+    answer, hits = await task
+    while not updates.empty():
+        stage, progress = updates.get_nowait()
+        await socket.send(json.dumps({
+            "type": "progress", "job_id": job["id"],
+            "stage": stage, "progress": progress,
+        }))
+    sources = []
+    for hit in hits:
+        source = {"source": hit["meta"]["source"],
+                  "unit": hit["meta"]["unit"]}
+        if source not in sources:
+            sources.append(source)
+    return {"type": "result", "job_id": job["id"],
+            "answer": answer, "sources": sources}
+
+
 async def run_slot(slot: int, query) -> None:
     slot_id = f"{WORKER_ID}-slot-{slot + 1}"
     while True:
@@ -69,17 +107,7 @@ async def run_slot(slot: int, query) -> None:
                     if kind == "job":
                         job = message["job"]
                         try:
-                            answer, hits = await asyncio.to_thread(
-                                query.answer, job["question"], k=job["k"],
-                                model=job["model"], history=job["history"])
-                            sources = []
-                            for hit in hits:
-                                source = {"source": hit["meta"]["source"],
-                                          "unit": hit["meta"]["unit"]}
-                                if source not in sources:
-                                    sources.append(source)
-                            result = {"type": "result", "job_id": job["id"],
-                                      "answer": answer, "sources": sources}
+                            result = await process_job(socket, job, query)
                         except Exception as error:  # noqa: BLE001
                             result = {"type": "result", "job_id": job["id"],
                                       "error": str(error)}
