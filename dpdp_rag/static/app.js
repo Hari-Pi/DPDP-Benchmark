@@ -655,6 +655,28 @@ function autoGrow() {
 
 window.addEventListener('resize', () => { syncPlaceholder(); autoGrow(); });
 
+/* Keep the composer above Android's on-screen keyboard. The visual viewport
+   API reports the covered portion even when the layout viewport is unchanged. */
+function syncKeyboardViewport() {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+  const overlap = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+  document.documentElement.style.setProperty('--keyboard-offset', overlap + 'px');
+  const open = overlap > 80;
+  document.body.classList.toggle('keyboard-open', open);
+  if (open && document.activeElement === qEl) {
+    window.setTimeout(() => qEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 50);
+  }
+}
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', syncKeyboardViewport);
+  window.visualViewport.addEventListener('scroll', syncKeyboardViewport);
+}
+qEl.addEventListener('focus', () => window.setTimeout(syncKeyboardViewport, 80));
+qEl.addEventListener('blur', () => window.setTimeout(syncKeyboardViewport, 120));
+syncKeyboardViewport();
+
 qEl.addEventListener('input', autoGrow);
 qEl.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
