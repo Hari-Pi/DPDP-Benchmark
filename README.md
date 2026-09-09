@@ -98,7 +98,7 @@ One-time setup:
 1. Create a GitHub personal access token with read access to this private repository.
 2. In Colab, open the Secrets panel (key icon), add `GITHUB_TOKEN`, and enable notebook access. This is only required because the repository is private.
 
-After that, open [`colab_worker.ipynb`](colab_worker.ipynb) from GitHub in Colab and choose **Runtime → Run all**. Its single code cell securely clones or updates the private repository, installs dependencies, starts Ollama, prepares the corpus/index, and connects the worker to `dpdp.hari-pi.com`.
+After that, open [`colab_worker.ipynb`](colab_worker.ipynb) (or the compatibility notebook [`colab_dpdp.ipynb`](colab_dpdp.ipynb)) from GitHub in Colab and choose **Runtime → Run all**. Each now contains the same single worker cell: it securely clones or refreshes the private repository, installs dependencies, starts Ollama, prepares the corpus/index, and connects the worker to `dpdp.hari-pi.com`. Neither notebook uses ngrok.
 
 If the repository is already cloned in a Colab runtime, the equivalent command is simply:
 
