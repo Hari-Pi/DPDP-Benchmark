@@ -45,6 +45,42 @@ export DPDP_WORKER_TOKEN
 
 "$PYTHON_BIN" -m pip install -q -r requirements.txt websockets requests
 
+# Tune parallel contexts to the accelerator visible in this runtime. Ollama's
+# memory use grows with parallelism × context length, so these profiles leave
+# headroom for the embedding model and GPU-resident retrieval matrix.
+gpu_name="none"
+vram_mib=0
+if command -v nvidia-smi >/dev/null 2>&1; then
+  gpu_name="$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n 1 | xargs)"
+  vram_mib="$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits \
+    | head -n 1 | xargs)"
+elif [[ "$(uname -s)" == "Darwin" ]]; then
+  gpu_name="Apple Metal (unified memory)"
+  vram_mib="$(( $(sysctl -n hw.memsize) / 1024 / 1024 ))"
+fi
+
+if (( vram_mib >= 32768 )); then
+  detected_parallel=4; detected_context=8192
+elif (( vram_mib >= 20000 )); then
+  detected_parallel=3; detected_context=6144
+elif (( vram_mib >= 12000 )); then
+  detected_parallel=2; detected_context=5120
+else
+  detected_parallel=1; detected_context=4096
+fi
+
+export DPDP_WORKER_CONCURRENCY="${DPDP_WORKER_CONCURRENCY:-$detected_parallel}"
+export DPDP_NUM_CTX="${DPDP_NUM_CTX:-$detected_context}"
+export OLLAMA_NUM_PARALLEL="${OLLAMA_NUM_PARALLEL:-$DPDP_WORKER_CONCURRENCY}"
+export OLLAMA_MAX_LOADED_MODELS="${OLLAMA_MAX_LOADED_MODELS:-2}"
+export OLLAMA_MAX_QUEUE="${OLLAMA_MAX_QUEUE:-64}"
+export OLLAMA_CONTEXT_LENGTH="${OLLAMA_CONTEXT_LENGTH:-$DPDP_NUM_CTX}"
+export OLLAMA_FLASH_ATTENTION="${OLLAMA_FLASH_ATTENTION:-1}"
+export OLLAMA_KV_CACHE_TYPE="${OLLAMA_KV_CACHE_TYPE:-q8_0}"
+export OLLAMA_KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:--1}"
+export DPDP_GPU_RETRIEVAL="${DPDP_GPU_RETRIEVAL:-1}"
+echo "GPU: $gpu_name; memory=${vram_mib}MiB; workers=$DPDP_WORKER_CONCURRENCY; context=$DPDP_NUM_CTX"
+
 if ! command -v ollama >/dev/null 2>&1; then
   if [[ "$(uname -s)" == "Darwin" ]]; then
     command -v brew >/dev/null 2>&1 \
@@ -66,9 +102,7 @@ if ! command -v ollama >/dev/null 2>&1; then
   fi
 fi
 if ! curl -fsS --max-time 3 http://127.0.0.1:11434/api/version >/dev/null 2>&1; then
-  OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 \
-    OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_NUM_PARALLEL=1 \
-    nohup ollama serve >/tmp/ollama_dpdp_worker.log 2>&1 &
+  nohup ollama serve >/tmp/ollama_dpdp_worker.log 2>&1 &
   for _ in $(seq 1 45); do
     curl -fsS --max-time 3 http://127.0.0.1:11434/api/version >/dev/null 2>&1 && break
     sleep 2
@@ -81,6 +115,14 @@ ollama list | awk '{print $1}' | grep -qx 'nomic-embed-text:latest' \
   || ollama pull nomic-embed-text
 ollama list | awk '{print $1}' | grep -qx 'qwen2.5:7b-instruct' \
   || ollama pull qwen2.5:7b-instruct
+
+# Load both models once and keep them resident. This eliminates repeated model
+# disk reads and CPU-to-GPU weight transfers during normal requests.
+curl -fsS http://127.0.0.1:11434/api/embed \
+  -d '{"model":"nomic-embed-text","input":"warmup","keep_alive":-1}' >/dev/null
+curl -fsS http://127.0.0.1:11434/api/generate \
+  -d '{"model":"qwen2.5:7b-instruct","prompt":"","keep_alive":-1}' >/dev/null
+ollama ps
 
 if [[ "${DPDP_SKIP_INGEST:-0}" != "1" ]]; then
   "$PYTHON_BIN" scripts/fetch_sources.py

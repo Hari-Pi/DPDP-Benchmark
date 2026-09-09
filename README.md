@@ -127,6 +127,14 @@ the PC disconnects or cannot answer a request, that request is automatically
 returned to the queue for a connected Colab worker. The browser always uses the
 same `dpdp.hari-pi.com` URL.
 
+At startup the Linux/macOS launcher detects available NVIDIA VRAM or Apple
+unified memory and selects a safe worker/Ollama parallelism profile. A 12–20 GB
+GPU (including a Colab T4) uses two concurrent requests by default. Larger GPUs
+use three or four. Override detection with `DPDP_WORKER_CONCURRENCY` and
+`DPDP_NUM_CTX`. Ollama keeps both models loaded, and dense retrieval vectors are
+cached on CUDA or Metal after their first use; HTTP/JSON, BM25, and initial
+loading remain CPU/disk operations.
+
 ## 9. Validating references (collected 2026-08-25)
 
 - RAGAS: Automated Evaluation of RAG — arXiv:2309.15217

@@ -1,6 +1,8 @@
 """Retrieval + generation with section-level citations."""
 import math
+import os
 import re
+import threading
 import time
 from collections import Counter
 from datetime import date
@@ -42,6 +44,10 @@ MSG_OVERHEAD = 8        # per-message role/delimiter tokens
 BLOCK_OVERHEAD = 12     # per-passage separator and citation header
 HISTORY_SHARE = 0.25    # cap on the share of the budget history may take
 _bm25_cache: dict = {"size": None, "docs": None, "df": None, "avgdl": 0.0}
+_bm25_lock = threading.Lock()
+_dense_cache: dict = {"size": None, "device": None, "matrix": None,
+                      "documents": None, "metadatas": None}
+_dense_lock = threading.Lock()
 
 
 def _retry(fn, *, what: str, attempts: int = 5, base_wait: float = 5.0):
@@ -83,17 +89,20 @@ def _bm25_search(question: str, n: int) -> list[dict]:
     col = client.get_or_create_collection(
         config.COLLECTION, metadata={"hnsw:space": "cosine"})
     total = col.count()
-    if _bm25_cache["size"] != total or _bm25_cache["docs"] is None:
-        got = col.get(include=["documents", "metadatas"])
-        docs = []
-        df: Counter = Counter()
-        for doc, meta in zip(got["documents"], got["metadatas"]):
-            tokens = _tokenize(doc)
-            docs.append({"text": doc, "meta": meta, "tokens": tokens,
-                         "len": len(tokens)})
-            df.update(set(tokens))
-        _bm25_cache.update(size=total, docs=docs, df=df,
-                           avgdl=sum(d["len"] for d in docs) / max(len(docs), 1))
+    with _bm25_lock:
+        if _bm25_cache["size"] != total or _bm25_cache["docs"] is None:
+            got = col.get(include=["documents", "metadatas"])
+            docs = []
+            df: Counter = Counter()
+            for doc, meta in zip(got["documents"], got["metadatas"]):
+                tokens = _tokenize(doc)
+                docs.append({"text": doc, "meta": meta, "tokens": tokens,
+                             "len": len(tokens)})
+                df.update(set(tokens))
+            _bm25_cache.update(
+                size=total, docs=docs, df=df,
+                avgdl=sum(d["len"] for d in docs) / max(len(docs), 1),
+            )
     docs, df, avgdl = (_bm25_cache["docs"], _bm25_cache["df"],
                        _bm25_cache["avgdl"])
     n_docs = len(docs)
@@ -198,15 +207,68 @@ def retrieve(question: str, k: int = config.TOP_K) -> list[dict]:
             model=config.EMBED_MODEL,
             input=[f"search_query: {question}"])["embeddings"][0],
         what="embed query")
-    res = col.query(query_embeddings=[emb],
-                    n_results=min(max(16, k * 2), col.count() or 16),
-                    include=["documents", "metadatas", "distances"])
-    dense = [{"text": doc, "meta": meta, "distance": dist}
-             for doc, meta, dist in zip(res["documents"][0],
-                                        res["metadatas"][0],
-                                        res["distances"][0])]
+    dense = _gpu_dense_search(col, emb, min(max(16, k * 2), col.count() or 16))
+    if dense is None:
+        res = col.query(query_embeddings=[emb],
+                        n_results=min(max(16, k * 2), col.count() or 16),
+                        include=["documents", "metadatas", "distances"])
+        dense = [{"text": doc, "meta": meta, "distance": dist}
+                 for doc, meta, dist in zip(res["documents"][0],
+                                            res["metadatas"][0],
+                                            res["distances"][0])]
     bm25 = _bm25_search(question, n=max(16, k * 2))
     return _hybrid_rerank(question, dense, bm25, k)
+
+
+def _gpu_dense_search(collection, query_embedding: list[float],
+                      n: int) -> list[dict] | None:
+    """Keep the small dense corpus on CUDA/MPS and score with one matrix op.
+
+    Disk/CPU is touched once to load Chroma's persisted vectors. Subsequent
+    dense queries remain on the accelerator for the worker's lifetime.
+    """
+    if os.environ.get("DPDP_GPU_RETRIEVAL", "1") == "0":
+        return None
+    try:
+        import torch
+    except ImportError:
+        return None
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        return None
+
+    total = collection.count()
+    with _dense_lock:
+        if (_dense_cache["size"] != total
+                or _dense_cache["device"] != device
+                or _dense_cache["matrix"] is None):
+            got = collection.get(include=["embeddings", "documents", "metadatas"])
+            if got["embeddings"] is None or len(got["embeddings"]) == 0:
+                return None
+            matrix = torch.tensor(got["embeddings"], dtype=torch.float32,
+                                  device=device)
+            matrix = torch.nn.functional.normalize(matrix, dim=1)
+            _dense_cache.update(
+                size=total, device=device, matrix=matrix,
+                documents=got["documents"], metadatas=got["metadatas"],
+            )
+            print(f"[gpu] cached {total} retrieval vectors on {device}")
+    query = torch.tensor(query_embedding, dtype=torch.float32, device=device)
+    query = torch.nn.functional.normalize(query, dim=0)
+    scores = _dense_cache["matrix"] @ query
+    values, indices = torch.topk(scores, k=min(n, total))
+    return [
+        {
+            "text": _dense_cache["documents"][index],
+            "meta": _dense_cache["metadatas"][index],
+            "distance": 1.0 - float(score),
+        }
+        for score, index in zip(values.detach().cpu().tolist(),
+                                indices.detach().cpu().tolist())
+    ]
 
 
 def _block(hit: dict, n: int = 0) -> str:

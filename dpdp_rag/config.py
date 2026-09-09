@@ -1,4 +1,5 @@
 """Configuration for the DPDP RAG pipeline."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -9,7 +10,7 @@ COLLECTION = "dpdp"
 
 EMBED_MODEL = "nomic-embed-text"
 CHAT_MODEL = "qwen2.5:7b-instruct"
-NUM_CTX = 5120            # reduced from 8192 to cut GPU memory/compute load
+NUM_CTX = int(os.environ.get("DPDP_NUM_CTX", "5120"))
 MAX_OUTPUT_TOKENS = 400   # bounds generation compute per answer
 
 CHUNK_SIZE = 900

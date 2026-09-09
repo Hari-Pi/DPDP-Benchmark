@@ -23,6 +23,7 @@ WORKER_ID = os.environ.get(
     "DPDP_WORKER_ID",
     f"{WORKER_KIND}-{socket.gethostname()}-{uuid.uuid4().hex[:8]}",
 )
+CONCURRENCY = max(1, min(8, int(os.environ.get("DPDP_WORKER_CONCURRENCY", "1"))))
 
 
 def sync_artifacts() -> None:
@@ -50,11 +51,8 @@ def sync_artifacts() -> None:
         destination.write_bytes(data)
 
 
-async def run() -> None:
-    if not TOKEN:
-        raise RuntimeError("DPDP_WORKER_TOKEN is required")
-    from . import query
-
+async def run_slot(slot: int, query) -> None:
+    slot_id = f"{WORKER_ID}-slot-{slot + 1}"
     while True:
         try:
             async with websockets.connect(
@@ -62,7 +60,7 @@ async def run() -> None:
                     ping_interval=20, ping_timeout=30,
                     max_size=16 * 1024 * 1024) as socket:
                 await socket.send(json.dumps({
-                    "type": "hello", "worker_id": WORKER_ID,
+                    "type": "hello", "worker_id": slot_id,
                     "worker_kind": WORKER_KIND,
                 }))
                 async for raw in socket:
@@ -91,8 +89,18 @@ async def run() -> None:
                     elif kind == "heartbeat_ack":
                         continue
         except Exception as error:  # noqa: BLE001
-            print(f"[worker] disconnected: {error}; retrying in 5s", flush=True)
+            print(f"[worker:{slot + 1}] disconnected: {error}; retrying in 5s",
+                  flush=True)
             await asyncio.sleep(5)
+
+
+async def run() -> None:
+    if not TOKEN:
+        raise RuntimeError("DPDP_WORKER_TOKEN is required")
+    from . import query
+
+    print(f"[worker] kind={WORKER_KIND} concurrency={CONCURRENCY}", flush=True)
+    await asyncio.gather(*(run_slot(slot, query) for slot in range(CONCURRENCY)))
 
 
 if __name__ == "__main__":
