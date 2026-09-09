@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Start the outbound Colab worker. No ngrok or inbound Colab port is needed.
+
+set -Eeuo pipefail
+
+readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+PYTHON_BIN="$(command -v python || command -v python3)"
+
+# In Colab, automatically read the token from the private Secrets panel. This
+# keeps the normal invocation down to one command and avoids putting the token
+# in notebook output, shell history, or Git.
+if [[ -z "${DPDP_WORKER_TOKEN:-}" ]] && "$PYTHON_BIN" -c \
+  'import importlib.util; raise SystemExit(0 if importlib.util.find_spec("google.colab") else 1)' \
+  >/dev/null 2>&1; then
+  DPDP_WORKER_TOKEN="$("$PYTHON_BIN" - <<'PY'
+from google.colab import userdata
+
+try:
+    print(userdata.get("DPDP_WORKER_TOKEN") or "", end="")
+except Exception:
+    pass
+PY
+)"
+  export DPDP_WORKER_TOKEN
+fi
+
+[[ -n "${DPDP_WORKER_TOKEN:-}" ]] || {
+  echo "DPDP_WORKER_TOKEN is missing." >&2
+  echo "Colab: add it under the key icon (Secrets), enable notebook access, and rerun." >&2
+  echo "Linux: export DPDP_WORKER_TOKEN before starting this script." >&2
+  exit 2
+}
+
+"$PYTHON_BIN" -m pip install -q -r requirements.txt websockets requests
+
+if ! command -v ollama >/dev/null 2>&1; then
+  curl -fsSL https://ollama.com/install.sh | sh
+fi
+if ! curl -fsS --max-time 3 http://127.0.0.1:11434/api/version >/dev/null 2>&1; then
+  OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 \
+    OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_NUM_PARALLEL=1 \
+    nohup ollama serve >/tmp/ollama_dpdp_worker.log 2>&1 &
+  for _ in $(seq 1 45); do
+    curl -fsS --max-time 3 http://127.0.0.1:11434/api/version >/dev/null 2>&1 && break
+    sleep 2
+  done
+fi
+curl -fsS --max-time 3 http://127.0.0.1:11434/api/version >/dev/null \
+  || { echo "Ollama did not start; see /tmp/ollama_dpdp_worker.log" >&2; exit 1; }
+
+ollama list | awk '{print $1}' | grep -qx 'nomic-embed-text:latest' \
+  || ollama pull nomic-embed-text
+ollama list | awk '{print $1}' | grep -qx 'qwen2.5:7b-instruct' \
+  || ollama pull qwen2.5:7b-instruct
+
+if [[ "${DPDP_SKIP_INGEST:-0}" != "1" ]]; then
+  "$PYTHON_BIN" scripts/fetch_sources.py
+  "$PYTHON_BIN" scripts/extract_text.py
+  "$PYTHON_BIN" -m dpdp_rag.ingest
+fi
+
+exec "$PYTHON_BIN" -m dpdp_rag.worker

@@ -1,6 +1,6 @@
 /* DPDP RAG — chat client.
-   Talks to POST /ask, renders markdown answers with citation chips and the
-   source list returned alongside each answer. */
+   Submits durable jobs to the Droidian coordinator and polls until the
+   connected Colab worker returns an answer. */
 'use strict';
 
 const DEFAULTS = { k: 8, model: 'qwen2.5:7b-instruct' };
@@ -409,6 +409,35 @@ function addPending() {
   return row;
 }
 
+function pendingStatus(row, text) {
+  const label = row && row.querySelector('p');
+  if (label) label.textContent = text;
+}
+
+async function waitForJob(jobId, pending) {
+  const deadline = Date.now() + 60 * 60 * 1000;
+  while (Date.now() < deadline) {
+    const res = await fetch('/api/jobs/' + encodeURIComponent(jobId), {
+      cache: 'no-store',
+    });
+    if (res.status === 401) {
+      openLogin(false);
+      throw new Error('Please sign in to continue.');
+    }
+    if (!res.ok) throw new Error('Could not read job status (HTTP ' + res.status + ')');
+    const job = await res.json();
+    if (job.status === 'completed') return job;
+    if (job.status === 'failed' || job.status === 'cancelled') {
+      throw new Error(job.error || 'The request was ' + job.status + '.');
+    }
+    pendingStatus(pending, job.status === 'running'
+      ? 'Colab worker is answering…'
+      : 'Waiting for a Colab worker…');
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+  }
+  throw new Error('The request timed out while waiting for the worker.');
+}
+
 /* ------------------------------------------------------------ empty state */
 
 const SUGGESTIONS = [
@@ -534,7 +563,7 @@ async function submitQuestion(question, opts) {
   const started = performance.now();
 
   try {
-    const res = await fetch('/ask', {
+    const res = await fetch('/api/jobs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -557,7 +586,10 @@ async function submitQuestion(question, opts) {
       } catch (e) {}
       throw new Error(detail);
     }
-    const data = await res.json();
+    const accepted = await res.json();
+    if (!accepted.job_id) throw new Error('The coordinator did not return a job id.');
+    pendingStatus(pending, 'Waiting for a Colab worker…');
+    const data = await waitForJob(accepted.job_id, pending);
     pending.remove();
     addAssistantMessage(data.answer, data.sources, {
       question: question,

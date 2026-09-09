@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Repoint the existing Cloudflare DPDP ingress to the durable local relay.
+
+set -euo pipefail
+
+readonly CONFIG_DIR="/etc/cloudflared"
+readonly CONFIG_FILE="$CONFIG_DIR/config.yml"
+readonly RELAY_ORIGIN="http://127.0.0.1:8787"
+
+docker run --rm -v "$CONFIG_DIR:/cfg" nginx:alpine sh -eu -c '
+  stamp="$(date +%Y%m%d-%H%M%S)"
+  cp -p /cfg/config.yml "/cfg/config.yml.pre-dpdp-relay-$stamp"
+  temporary="$(mktemp /cfg/config.yml.XXXXXX)"
+  awk '\''
+    /^[[:space:]]*- hostname:[[:space:]]*dpdp\.hari-pi\.com[[:space:]]*$/ {
+      found_host = 1
+      in_dpdp = 1
+      print
+      next
+    }
+    in_dpdp && /^[[:space:]]*service:[[:space:]]*/ {
+      print "    service: http://127.0.0.1:8787"
+      found_service = 1
+      in_dpdp = 0
+      next
+    }
+    { print }
+    END {
+      if (!found_host || !found_service) exit 42
+    }
+  '\'' /cfg/config.yml > "$temporary"
+  owner="$(stat -c %u:%g /cfg/config.yml)"
+  mode="$(stat -c %a /cfg/config.yml)"
+  chown "$owner" "$temporary"
+  chmod "$mode" "$temporary"
+  mv "$temporary" /cfg/config.yml
+'
+
+docker run --rm \
+  -v "$CONFIG_DIR:/cfg:ro" \
+  -v /usr/bin/cloudflared:/usr/bin/cloudflared:ro \
+  --entrypoint /usr/bin/cloudflared \
+  nginx:alpine \
+  --config /cfg/config.yml tunnel ingress validate
+
+docker run --rm --privileged --pid=host nginx:alpine \
+  nsenter -t 1 -m -u -i -n -- systemctl restart cloudflared.service
+
+sleep 2
+if [[ "$(systemctl show cloudflared.service -p ActiveState --value)" != "active" ]]; then
+  echo "cloudflared did not return to active state" >&2
+  exit 1
+fi
+
+echo "dpdp.hari-pi.com -> $RELAY_ORIGIN"

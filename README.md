@@ -89,6 +89,26 @@ Benchmark/harness papers are citation magnets and are accepted from undergrad te
 
 Maps onto Averra's **Data Governance** (DPDPA 2023 module) and **Data Science & AI with Gen AI** (LLMs, RAG) courses — reusable as an academy showcase project and demo.
 
+## Private Colab worker
+
+The public UI and durable queue live at [dpdp.hari-pi.com](https://dpdp.hari-pi.com). Colab only supplies outbound LLM/RAG compute, so it does not need ngrok, an inbound port, or a stable Colab URL. If Colab disconnects, the site stays online and queued work waits for the next worker.
+
+One-time setup:
+
+1. Create a GitHub personal access token with read access to this private repository.
+2. In Colab, open the Secrets panel (key icon), add `GITHUB_TOKEN` and `DPDP_WORKER_TOKEN`, and enable notebook access for both.
+3. Retrieve the worker token from the Droidian host when needed: `ssh dazai@droidian 'cat /home/dazai/dpdp-coordinator/worker.env'`.
+
+After that, open [`colab_worker.ipynb`](colab_worker.ipynb) from GitHub in Colab and choose **Runtime → Run all**. Its single code cell securely clones or updates the private repository, installs dependencies, starts Ollama, prepares the corpus/index, and connects the worker to `dpdp.hari-pi.com`.
+
+If the repository is already cloned in a Colab runtime, the equivalent command is simply:
+
+```bash
+bash scripts/start_colab_worker.sh
+```
+
+The launcher reads `DPDP_WORKER_TOKEN` directly from Colab Secrets. Leave the cell running while you want GPU-backed answers; stopping or resetting Colab safely disconnects the worker and returns an in-progress job to the durable queue.
+
 ## 9. Validating references (collected 2026-08-25)
 
 - RAGAS: Automated Evaluation of RAG — arXiv:2309.15217
