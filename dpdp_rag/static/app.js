@@ -1,9 +1,9 @@
 /* DPDP RAG — chat client.
    Submits durable jobs to the Droidian coordinator and polls until the
-   connected Colab worker returns an answer. */
+   selected PC or Colab worker returns an answer. */
 'use strict';
 
-const DEFAULTS = { k: 8, model: 'qwen2.5:7b-instruct' };
+const DEFAULTS = { k: 8, model: 'qwen2.5:7b-instruct', worker: 'auto' };
 const MAX_HISTORY = 6;          // must match MAX_HISTORY on the server
 
 const $ = (id) => document.getElementById(id);
@@ -113,9 +113,11 @@ function loadSettings() {
   } catch (e) {}
   settings.k = Math.min(20, Math.max(1, Number(settings.k) || DEFAULTS.k));
   if (!settings.model) settings.model = DEFAULTS.model;
+  if (!['auto', 'pc', 'colab'].includes(settings.worker)) settings.worker = DEFAULTS.worker;
   $('kRange').value = settings.k;
   $('kVal').textContent = settings.k;
   $('modelInput').value = settings.model;
+  $('workerSelect').value = settings.worker;
 }
 
 function saveSettings() {
@@ -131,6 +133,13 @@ $('modelInput').addEventListener('change', (e) => {
   settings.model = e.target.value.trim() || DEFAULTS.model;
   e.target.value = settings.model;
   saveSettings();
+});
+$('workerSelect').addEventListener('change', (e) => {
+  settings.worker = e.target.value;
+  saveSettings();
+  toast(settings.worker === 'auto'
+    ? 'Automatic worker selection'
+    : settings.worker.toUpperCase() + ' selected');
 });
 $('resetSettings').addEventListener('click', () => {
   Object.assign(settings, DEFAULTS);
@@ -586,6 +595,7 @@ async function submitQuestion(question, opts) {
         history: history,
         k: settings.k,
         model: settings.model,
+        worker: settings.worker,
       }),
     });
     if (res.status === 401) {
@@ -603,7 +613,9 @@ async function submitQuestion(question, opts) {
     }
     const accepted = await res.json();
     if (!accepted.job_id) throw new Error('The coordinator did not return a job id.');
-    pendingStatus(pending, 'Queued · waiting for a compute worker…', 2);
+    const target = settings.worker === 'pc' ? 'PC worker'
+      : settings.worker === 'colab' ? 'Colab worker' : 'available worker';
+    pendingStatus(pending, 'Queued · waiting for ' + target + '…', 2);
     const data = await waitForJob(accepted.job_id, pending);
     pending.remove();
     addAssistantMessage(data.answer, data.sources, {
@@ -701,7 +713,7 @@ async function pingHealth() {
       pill.setAttribute('data-tip', 'Site online; start the PC or Colab worker');
     } else {
       dot.className = 'inline-block size-1.5 rounded-full bg-success';
-      if (types.pc && types.colab) text.textContent = workers + ' worker slots';
+      if (types.pc && types.colab) text.textContent = 'PC + Colab ready';
       else if (types.pc) text.textContent = 'PC ready';
       else if (types.colab) text.textContent = 'Colab ready';
       else text.textContent = workers + ' worker' + (workers === 1 ? '' : 's');

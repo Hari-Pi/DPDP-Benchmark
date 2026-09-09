@@ -79,18 +79,30 @@ class JobStore:
                     "ALTER TABLE jobs ADD COLUMN stage TEXT "
                     "NOT NULL DEFAULT 'Queued'"
                 )
+            if "preferred_worker" not in columns:
+                conn.execute(
+                    "ALTER TABLE jobs ADD COLUMN preferred_worker TEXT "
+                    "NOT NULL DEFAULT 'auto'"
+                )
 
     def create(self, *, question: str, history: list[dict], k: int,
-               model: str) -> dict:
+               model: str, preferred_worker: str = "auto") -> dict:
         job_id = str(uuid.uuid4())
         now = _now()
+        preference = preferred_worker if preferred_worker in {"auto", "pc", "colab"} else "auto"
+        stage = {
+            "auto": "Queued for the next available worker",
+            "pc": "Queued for the PC worker",
+            "colab": "Queued for the Colab worker",
+        }[preference]
         with self._connect() as conn:
             conn.execute(
                 """INSERT INTO jobs
                    (id, question, history_json, k, model, status,
-                    created_at, updated_at)
-                   VALUES (?, ?, ?, ?, ?, 'queued', ?, ?)""",
-                (job_id, question, json.dumps(history), k, model, now, now),
+                    preferred_worker, stage, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, 'queued', ?, ?, ?, ?)""",
+                (job_id, question, json.dumps(history), k, model,
+                 preference, stage, now, now),
             )
         return self.get(job_id)  # type: ignore[return-value]
 
@@ -117,12 +129,17 @@ class JobStore:
 
     def claim_next(self, worker_id: str, *, worker_kind: str = "colab",
                    pc_available: bool = False) -> dict | None:
-        """Claim work while preferring PC and preserving Colab fallback."""
+        """Claim work matching its explicit worker preference or auto policy."""
         condition = "status='queued'"
         if worker_kind == "pc":
-            condition += " AND pc_attempted=0"
-        elif pc_available:
-            condition += " AND pc_attempted=1"
+            condition += (
+                " AND preferred_worker IN ('auto', 'pc')"
+                " AND (preferred_worker='pc' OR pc_attempted=0)"
+            )
+        else:
+            condition += " AND preferred_worker IN ('auto', 'colab')"
+            if pc_available:
+                condition += " AND (preferred_worker='colab' OR pc_attempted=1)"
         with self._connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             row = conn.execute(
@@ -132,11 +149,12 @@ class JobStore:
             if row is None:
                 conn.commit()
                 return None
+            worker_label = "PC" if worker_kind == "pc" else "Colab"
             conn.execute(
                 "UPDATE jobs SET status='running', worker_id=?, progress=5, "
                 "stage=?, updated_at=? "
                 "WHERE id=? AND status='queued'",
-                (worker_id, f"{worker_kind.title()} worker started", _now(), row["id"]),
+                (worker_id, f"{worker_label} worker started", _now(), row["id"]),
             )
             conn.commit()
         return self.get(row["id"])
@@ -192,7 +210,10 @@ class JobStore:
             result = conn.execute(
                 "UPDATE jobs SET status='queued', worker_id=NULL, "
                 "pc_attempted=MAX(pc_attempted, ?), progress=5, "
-                "stage=?, updated_at=? "
+                "stage=CASE "
+                "WHEN preferred_worker='pc' THEN 'PC disconnected; waiting for PC' "
+                "WHEN preferred_worker='colab' THEN 'Colab disconnected; waiting for Colab' "
+                "ELSE ? END, updated_at=? "
                 "WHERE status='running' AND worker_id=?",
                 (int(pc_attempted),
                  "Worker disconnected; waiting for fallback" if pc_attempted

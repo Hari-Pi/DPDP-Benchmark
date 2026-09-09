@@ -273,6 +273,15 @@
           </div>
         </details>
 
+        <div class="tooltip tooltip-top" data-tip="Choose where this request runs">
+          <select id="workerSelect" aria-label="Compute worker"
+                  class="select select-ghost select-sm my-0.5 w-[5.8rem] shrink-0 px-2 text-xs font-semibold focus:outline-none sm:w-[6.6rem]">
+            <option value="auto">Auto</option>
+            <option value="pc">PC</option>
+            <option value="colab">Colab</option>
+          </select>
+        </div>
+
         <textarea id="q" rows="1" autocomplete="off"
                   class="min-h-10 flex-1 resize-none border-0 bg-transparent px-1.5 py-2 text-[0.95rem] leading-6
                          placeholder:text-base-content/40 focus:outline-none"
@@ -359,6 +368,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-<script src="/static/app.js?v=20260909-pc-detection"></script>
+<script src="/static/app.js?v=20260909-worker-selector"></script>
 </body>
 </html>

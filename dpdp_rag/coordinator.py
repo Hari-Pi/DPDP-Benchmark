@@ -51,6 +51,7 @@ class JobRequest(BaseModel):
     history: list[Message] = Field(default_factory=list, max_length=12)
     k: int = Field(default=config.TOP_K, ge=1, le=20)
     model: str = Field(default=config.CHAT_MODEL)
+    worker: Literal["auto", "pc", "colab"] = "auto"
 
 
 class LoginRequest(BaseModel):
@@ -94,6 +95,7 @@ def _job_response(job: dict) -> dict:
         "error": job.get("error"),
         "progress": job.get("progress", 0),
         "stage": job.get("stage", "Queued"),
+        "worker": job.get("preferred_worker", "auto"),
         "created_at": job["created_at"],
         "updated_at": job["updated_at"],
     }
@@ -162,6 +164,7 @@ def submit_job(body: JobRequest, request: Request,
         history=[message.model_dump() for message in body.history[-MAX_HISTORY:]],
         k=body.k,
         model=body.model,
+        preferred_worker=body.worker,
     )
     return _job_response(job)
 
@@ -260,7 +263,8 @@ async def worker_socket(websocket: WebSocket) -> None:
                     if message.get("type") != "result" or message.get("job_id") != job["id"]:
                         continue
                     if message.get("error"):
-                        if worker_kind == "pc":
+                        if (worker_kind == "pc"
+                                and job.get("preferred_worker", "auto") == "auto"):
                             store.retry_on_colab(job["id"], str(message["error"]))
                         else:
                             store.fail(job["id"], str(message["error"]))

@@ -68,6 +68,40 @@ class JobStoreTests(unittest.TestCase):
                 job["id"],
             )
 
+    def test_manual_worker_selection_is_strict(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = JobStore(Path(directory) / "jobs.sqlite3")
+            colab_job = store.create(
+                question="colab", history=[], k=3, model="m",
+                preferred_worker="colab",
+            )
+            pc_job = store.create(
+                question="pc", history=[], k=3, model="m",
+                preferred_worker="pc",
+            )
+
+            # Each worker skips the other worker's manually targeted request.
+            claimed_pc = store.claim_next("pc-1", worker_kind="pc")
+            self.assertEqual(claimed_pc["id"], pc_job["id"])
+            self.assertEqual(claimed_pc["preferred_worker"], "pc")
+            claimed_colab = store.claim_next(
+                "colab-1", worker_kind="colab", pc_available=True)
+            self.assertEqual(claimed_colab["id"], colab_job["id"])
+            self.assertEqual(claimed_colab["preferred_worker"], "colab")
+            store.complete(claimed_colab["id"], answer="done", sources=[])
+
+            # Colab cannot consume another request explicitly sent to PC.
+            pc_only = store.create(
+                question="pc-only", history=[], k=3, model="m",
+                preferred_worker="pc",
+            )
+            self.assertIsNone(store.claim_next(
+                "colab-1", worker_kind="colab", pc_available=False))
+            self.assertEqual(
+                store.claim_next("pc-2", worker_kind="pc")["id"],
+                pc_only["id"],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
