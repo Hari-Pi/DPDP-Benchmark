@@ -36,6 +36,7 @@ if ($vramMiB -ge 32768) {
 }
 if (-not $env:DPDP_WORKER_CONCURRENCY) { $env:DPDP_WORKER_CONCURRENCY = "$parallel" }
 if (-not $env:DPDP_NUM_CTX) { $env:DPDP_NUM_CTX = "$context" }
+if (-not $env:DPDP_MAX_OUTPUT_TOKENS) { $env:DPDP_MAX_OUTPUT_TOKENS = "800" }
 if (-not $env:OLLAMA_NUM_PARALLEL) { $env:OLLAMA_NUM_PARALLEL = $env:DPDP_WORKER_CONCURRENCY }
 if (-not $env:OLLAMA_MAX_LOADED_MODELS) { $env:OLLAMA_MAX_LOADED_MODELS = "2" }
 if (-not $env:OLLAMA_MAX_QUEUE) { $env:OLLAMA_MAX_QUEUE = "64" }
@@ -44,7 +45,7 @@ if (-not $env:OLLAMA_FLASH_ATTENTION) { $env:OLLAMA_FLASH_ATTENTION = "1" }
 if (-not $env:OLLAMA_KV_CACHE_TYPE) { $env:OLLAMA_KV_CACHE_TYPE = "q8_0" }
 if (-not $env:OLLAMA_KEEP_ALIVE) { $env:OLLAMA_KEEP_ALIVE = "-1" }
 if (-not $env:DPDP_GPU_RETRIEVAL) { $env:DPDP_GPU_RETRIEVAL = "1" }
-Write-Host "GPU: $gpuName; VRAM=${vramMiB}MiB; workers=$env:DPDP_WORKER_CONCURRENCY; context=$env:DPDP_NUM_CTX"
+Write-Host "GPU: $gpuName; VRAM=${vramMiB}MiB; workers=$env:DPDP_WORKER_CONCURRENCY; context=$env:DPDP_NUM_CTX; output_tokens=$env:DPDP_MAX_OUTPUT_TOKENS"
 
 Write-Host "[setup] Checking Python dependencies..."
 $python = (Get-Command python -ErrorAction Stop).Source

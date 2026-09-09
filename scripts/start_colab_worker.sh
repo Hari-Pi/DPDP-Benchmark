@@ -71,6 +71,7 @@ fi
 
 export DPDP_WORKER_CONCURRENCY="${DPDP_WORKER_CONCURRENCY:-$detected_parallel}"
 export DPDP_NUM_CTX="${DPDP_NUM_CTX:-$detected_context}"
+export DPDP_MAX_OUTPUT_TOKENS="${DPDP_MAX_OUTPUT_TOKENS:-800}"
 export OLLAMA_NUM_PARALLEL="${OLLAMA_NUM_PARALLEL:-$DPDP_WORKER_CONCURRENCY}"
 export OLLAMA_MAX_LOADED_MODELS="${OLLAMA_MAX_LOADED_MODELS:-2}"
 export OLLAMA_MAX_QUEUE="${OLLAMA_MAX_QUEUE:-64}"
@@ -79,7 +80,7 @@ export OLLAMA_FLASH_ATTENTION="${OLLAMA_FLASH_ATTENTION:-1}"
 export OLLAMA_KV_CACHE_TYPE="${OLLAMA_KV_CACHE_TYPE:-q8_0}"
 export OLLAMA_KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:--1}"
 export DPDP_GPU_RETRIEVAL="${DPDP_GPU_RETRIEVAL:-1}"
-echo "GPU: $gpu_name; memory=${vram_mib}MiB; workers=$DPDP_WORKER_CONCURRENCY; context=$DPDP_NUM_CTX"
+echo "GPU: $gpu_name; memory=${vram_mib}MiB; workers=$DPDP_WORKER_CONCURRENCY; context=$DPDP_NUM_CTX; output_tokens=$DPDP_MAX_OUTPUT_TOKENS"
 
 if ! command -v ollama >/dev/null 2>&1; then
   if [[ "$(uname -s)" == "Darwin" ]]; then
