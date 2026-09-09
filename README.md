@@ -158,7 +158,10 @@ vector index and Ollama model store to Droidian from PowerShell:
 .\scripts\publish_cache.ps1
 ```
 
-The script copies the cache into the coordinator's read-only artifact volume.
+The script copies only the small vector index into the coordinator's read-only
+artifact volume. Ollama downloads model weights directly in Colab by default;
+use `-IncludeModels` only if you explicitly want to transfer the large model
+store to Droidian.
 On the next Colab startup, `scripts/start_colab_worker.sh` downloads and
 verifies the cache before Ollama starts. A valid `chroma_db` cache skips the
 expensive fetch/extract/ingest stages; if the cache is missing or invalid,
