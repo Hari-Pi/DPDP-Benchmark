@@ -11,7 +11,9 @@ COLLECTION = "dpdp"
 EMBED_MODEL = "nomic-embed-text"
 CHAT_MODEL = "qwen2.5:7b-instruct"
 NUM_CTX = int(os.environ.get("DPDP_NUM_CTX", "5120"))
-MAX_OUTPUT_TOKENS = 400   # bounds generation compute per answer
+# Keep answers from ending mid-sentence/list while allowing deployments to
+# tune generation independently of the prompt context window.
+MAX_OUTPUT_TOKENS = int(os.environ.get("DPDP_MAX_OUTPUT_TOKENS", "800"))
 
 CHUNK_SIZE = 900
 CHUNK_OVERLAP = 150
