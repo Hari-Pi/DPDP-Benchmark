@@ -49,6 +49,9 @@ _bm25_lock = threading.Lock()
 _dense_cache: dict = {"size": None, "device": None, "matrix": None,
                       "documents": None, "metadatas": None}
 _dense_lock = threading.Lock()
+_chroma_lock = threading.RLock()
+_chroma_client = None
+_chroma_collection = None
 ProgressCallback = Callable[[str, int], None]
 
 
@@ -80,6 +83,29 @@ def _client() -> Client:
     return Client(host="http://localhost:11434")
 
 
+def _collection():
+    """Return one process-wide Chroma collection.
+
+    Chroma's embedded Rust bindings can race when several worker threads each
+    construct a PersistentClient at the same time. Sharing one initialized
+    client keeps parallel GPU work safe; the short local index operations are
+    guarded separately from Ollama inference.
+    """
+    global _chroma_client, _chroma_collection
+    with _chroma_lock:
+        if _chroma_collection is None:
+            _chroma_client = chromadb.PersistentClient(path=str(config.DB_DIR))
+            _chroma_collection = _chroma_client.get_or_create_collection(
+                config.COLLECTION, metadata={"hnsw:space": "cosine"})
+        return _chroma_collection
+
+
+def warmup() -> int:
+    """Initialize Chroma once before concurrent worker slots start."""
+    with _chroma_lock:
+        return _collection().count()
+
+
 def _tokenize(text: str) -> list[str]:
     return [_stem(t) for t in
             re.findall(r"[a-z][a-z\-]{2,}|\d{2,}", text.lower())
@@ -92,13 +118,13 @@ def _bm25_search(question: str, n: int) -> list[dict]:
     This guarantees keyword-only matches (e.g. the corrigendum or penalty
     schedule) are always candidates, even when dense retrieval misses them.
     """
-    client = chromadb.PersistentClient(path=str(config.DB_DIR))
-    col = client.get_or_create_collection(
-        config.COLLECTION, metadata={"hnsw:space": "cosine"})
-    total = col.count()
+    col = _collection()
+    with _chroma_lock:
+        total = col.count()
     with _bm25_lock:
         if _bm25_cache["size"] != total or _bm25_cache["docs"] is None:
-            got = col.get(include=["documents", "metadatas"])
+            with _chroma_lock:
+                got = col.get(include=["documents", "metadatas"])
             docs = []
             df: Counter = Counter()
             for doc, meta in zip(got["documents"], got["metadatas"]):
@@ -208,9 +234,7 @@ def _hybrid_rerank(question: str, dense: list[dict], bm25: list[dict],
 def retrieve(question: str, k: int = config.TOP_K,
              progress: ProgressCallback | None = None) -> list[dict]:
     _report(progress, "Opening the legal index", 12)
-    chroma = chromadb.PersistentClient(path=str(config.DB_DIR))
-    col = chroma.get_or_create_collection(
-        config.COLLECTION, metadata={"hnsw:space": "cosine"})
+    col = _collection()
     _report(progress, "Embedding your question on the GPU", 20)
     emb = _retry(
         lambda: _client().embed(
@@ -218,11 +242,14 @@ def retrieve(question: str, k: int = config.TOP_K,
             input=[f"search_query: {question}"])["embeddings"][0],
         what="embed query")
     _report(progress, "Searching semantic matches", 30)
-    dense = _gpu_dense_search(col, emb, min(max(16, k * 2), col.count() or 16))
+    with _chroma_lock:
+        result_count = min(max(16, k * 2), col.count() or 16)
+    dense = _gpu_dense_search(col, emb, result_count)
     if dense is None:
-        res = col.query(query_embeddings=[emb],
-                        n_results=min(max(16, k * 2), col.count() or 16),
-                        include=["documents", "metadatas", "distances"])
+        with _chroma_lock:
+            res = col.query(query_embeddings=[emb],
+                            n_results=min(max(16, k * 2), col.count() or 16),
+                            include=["documents", "metadatas", "distances"])
         dense = [{"text": doc, "meta": meta, "distance": dist}
                  for doc, meta, dist in zip(res["documents"][0],
                                             res["metadatas"][0],
@@ -253,12 +280,15 @@ def _gpu_dense_search(collection, query_embedding: list[float],
     else:
         return None
 
-    total = collection.count()
+    with _chroma_lock:
+        total = collection.count()
     with _dense_lock:
         if (_dense_cache["size"] != total
                 or _dense_cache["device"] != device
                 or _dense_cache["matrix"] is None):
-            got = collection.get(include=["embeddings", "documents", "metadatas"])
+            with _chroma_lock:
+                got = collection.get(
+                    include=["embeddings", "documents", "metadatas"])
             if got["embeddings"] is None or len(got["embeddings"]) == 0:
                 return None
             matrix = torch.tensor(got["embeddings"], dtype=torch.float32,
@@ -371,6 +401,7 @@ def answer(question: str, k: int = config.TOP_K, model: str = config.CHAT_MODEL,
         "role": "user",
         "content": f"Context:\n\n{context}\n\nQuestion: {question}",
     })
+
     def generate() -> str:
         parts: list[str] = []
         characters = 0

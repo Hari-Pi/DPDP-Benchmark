@@ -127,6 +127,8 @@ async def run() -> None:
         raise RuntimeError("DPDP_WORKER_TOKEN is required")
     from . import query
 
+    vectors = await asyncio.to_thread(query.warmup)
+    print(f"[worker] index ready: {vectors} vectors", flush=True)
     print(f"[worker] kind={WORKER_KIND} concurrency={CONCURRENCY}", flush=True)
     await asyncio.gather(*(run_slot(slot, query) for slot in range(CONCURRENCY)))
 
