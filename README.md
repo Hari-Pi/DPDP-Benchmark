@@ -116,6 +116,12 @@ From macOS or Linux, start the PC worker with:
 bash scripts/start_pc_worker.sh
 ```
 
+On Windows, use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\start_pc_worker.ps1
+```
+
 The coordinator always gives new requests to the PC while it is connected. If
 the PC disconnects or cannot answer a request, that request is automatically
 returned to the queue for a connected Colab worker. The browser always uses the
