@@ -29,7 +29,13 @@ WORKER_TOKEN = os.environ.get("DPDP_WORKER_TOKEN", "")
 MAX_HISTORY = 6
 COOKIE = "dpdp_session"
 
-app = FastAPI(title="DPDP RAG Coordinator", version="0.1.0")
+app = FastAPI(
+    title="DPDP RAG Coordinator",
+    version="0.1.0",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 store = JobStore(DB_PATH)
 connected_workers: set[str] = set()
