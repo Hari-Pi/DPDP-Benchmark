@@ -1,4 +1,4 @@
-/* DPDP RAG — chat client.
+/* DPDP — chat client.
    Submits durable jobs to the Droidian coordinator and polls until the
    selected PC or Colab worker returns an answer. */
 'use strict';
