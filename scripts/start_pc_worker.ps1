@@ -46,6 +46,7 @@ if (-not $env:OLLAMA_KEEP_ALIVE) { $env:OLLAMA_KEEP_ALIVE = "-1" }
 if (-not $env:DPDP_GPU_RETRIEVAL) { $env:DPDP_GPU_RETRIEVAL = "1" }
 Write-Host "GPU: $gpuName; VRAM=${vramMiB}MiB; workers=$env:DPDP_WORKER_CONCURRENCY; context=$env:DPDP_NUM_CTX"
 
+Write-Host "[setup] Checking Python dependencies..."
 $python = (Get-Command python -ErrorAction Stop).Source
 & $python -m pip install -q -r requirements.txt websockets requests
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -68,6 +69,7 @@ if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
     }
 }
 
+Write-Host "[setup] Checking the Ollama service..."
 try {
     Invoke-RestMethod http://127.0.0.1:11434/api/version -TimeoutSec 3 | Out-Null
 } catch {
@@ -85,9 +87,11 @@ try {
 }
 
 $models = (& ollama list) -join "`n"
+Write-Host "[setup] Checking required models..."
 if ($models -notmatch "nomic-embed-text") { & ollama pull nomic-embed-text }
 if ($models -notmatch "qwen2.5:7b-instruct") { & ollama pull qwen2.5:7b-instruct }
 
+Write-Host "[setup] Warming GPU models..."
 $embedWarmup = @{ model = "nomic-embed-text"; input = "warmup"; keep_alive = -1 } | ConvertTo-Json
 $chatWarmup = @{ model = "qwen2.5:7b-instruct"; prompt = ""; keep_alive = -1 } | ConvertTo-Json
 Invoke-RestMethod http://127.0.0.1:11434/api/embed -Method Post -ContentType "application/json" -Body $embedWarmup | Out-Null
@@ -95,9 +99,13 @@ Invoke-RestMethod http://127.0.0.1:11434/api/generate -Method Post -ContentType 
 & ollama ps
 
 if ($env:DPDP_SKIP_INGEST -ne "1") {
+    Write-Host "[setup] Updating sources and validating the vector index..."
     & $python scripts/fetch_sources.py
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     & $python scripts/extract_text.py
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     & $python -m dpdp_rag.ingest
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 Write-Host "Connecting this PC as the preferred worker for dpdp.hari-pi.com..."
