@@ -108,6 +108,19 @@ bash scripts/start_colab_worker.sh
 
 The worker credential is bundled in this private repository, so it requires no additional setup. Leave the cell running while you want GPU-backed answers; stopping or resetting Colab safely disconnects the worker and returns an in-progress job to the durable queue. Public access remains separately protected by the login on `dpdp.hari-pi.com`.
 
+## Preferred PC worker with Colab fallback
+
+From macOS or Linux, start the PC worker with:
+
+```bash
+bash scripts/start_pc_worker.sh
+```
+
+The coordinator always gives new requests to the PC while it is connected. If
+the PC disconnects or cannot answer a request, that request is automatically
+returned to the queue for a connected Colab worker. The browser always uses the
+same `dpdp.hari-pi.com` URL.
+
 ## 9. Validating references (collected 2026-08-25)
 
 - RAGAS: Automated Evaluation of RAG — arXiv:2309.15217

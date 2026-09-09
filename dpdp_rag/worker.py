@@ -15,8 +15,14 @@ import websockets
 COORDINATOR = os.environ.get(
     "DPDP_COORDINATOR_URL", "wss://dpdp.hari-pi.com/internal/worker/ws")
 TOKEN = os.environ.get("DPDP_WORKER_TOKEN", "")
+WORKER_KIND = os.environ.get(
+    "DPDP_WORKER_KIND",
+    "colab" if os.environ.get("COLAB_RELEASE_TAG") else "pc",
+).lower()
 WORKER_ID = os.environ.get(
-    "DPDP_WORKER_ID", f"colab-{socket.gethostname()}-{uuid.uuid4().hex[:8]}")
+    "DPDP_WORKER_ID",
+    f"{WORKER_KIND}-{socket.gethostname()}-{uuid.uuid4().hex[:8]}",
+)
 
 
 def sync_artifacts() -> None:
@@ -57,6 +63,7 @@ async def run() -> None:
                     max_size=16 * 1024 * 1024) as socket:
                 await socket.send(json.dumps({
                     "type": "hello", "worker_id": WORKER_ID,
+                    "worker_kind": WORKER_KIND,
                 }))
                 async for raw in socket:
                     message = json.loads(raw)

@@ -38,7 +38,7 @@ app = FastAPI(
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 store = JobStore(DB_PATH)
-connected_workers: set[str] = set()
+connected_workers: dict[str, str] = {}
 
 
 class Message(BaseModel):
@@ -105,8 +105,12 @@ def index() -> FileResponse:
 @app.get("/health")
 def health() -> dict:
     counts = store.counts()
+    worker_types = {
+        kind: sum(1 for value in connected_workers.values() if value == kind)
+        for kind in ("pc", "colab")
+    }
     return {"status": "ok", "coordinator": "ready", "jobs": counts,
-            "workers": len(connected_workers)}
+            "workers": len(connected_workers), "worker_types": worker_types}
 
 
 @app.get("/auth/check")
@@ -203,16 +207,31 @@ async def worker_socket(websocket: WebSocket) -> None:
         return
     await websocket.accept()
     worker_id = ""
+    worker_kind = "colab"
     try:
         hello = await asyncio.wait_for(websocket.receive_json(), timeout=15)
         if hello.get("type") != "hello" or not hello.get("worker_id"):
             await websocket.close(code=4400, reason="hello required")
             return
         worker_id = str(hello["worker_id"])[:128]
-        connected_workers.add(worker_id)
-        await websocket.send_json({"type": "ready", "worker_id": worker_id})
+        worker_kind = str(hello.get("worker_kind", "colab")).lower()
+        if worker_kind not in {"pc", "colab"}:
+            await websocket.close(code=4400, reason="invalid worker kind")
+            return
+        connected_workers[worker_id] = worker_kind
+        await websocket.send_json({
+            "type": "ready", "worker_id": worker_id,
+            "worker_kind": worker_kind,
+        })
         while True:
-            job = store.claim_next(worker_id)
+            pc_available = any(
+                kind == "pc" for wid, kind in connected_workers.items()
+                if wid != worker_id
+            )
+            job = store.claim_next(
+                worker_id, worker_kind=worker_kind,
+                pc_available=pc_available,
+            )
             if job is not None:
                 await websocket.send_json({
                     "type": "job",
@@ -231,7 +250,10 @@ async def worker_socket(websocket: WebSocket) -> None:
                     if message.get("type") != "result" or message.get("job_id") != job["id"]:
                         continue
                     if message.get("error"):
-                        store.fail(job["id"], str(message["error"]))
+                        if worker_kind == "pc":
+                            store.retry_on_colab(job["id"], str(message["error"]))
+                        else:
+                            store.fail(job["id"], str(message["error"]))
                     else:
                         store.complete(
                             job["id"], answer=str(message.get("answer", "")),
@@ -251,8 +273,9 @@ async def worker_socket(websocket: WebSocket) -> None:
         pass
     finally:
         if worker_id:
-            connected_workers.discard(worker_id)
-            store.requeue_worker(worker_id)
+            connected_workers.pop(worker_id, None)
+            store.requeue_worker(
+                worker_id, pc_attempted=(worker_kind == "pc"))
 
 
 @app.get("/internal/worker/artifact-manifest")

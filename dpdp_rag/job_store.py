@@ -5,8 +5,10 @@ import json
 import sqlite3
 import threading
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Iterator
 
 
 def _now() -> str:
@@ -26,11 +28,16 @@ class JobStore:
         self._init_lock = threading.Lock()
         self._initialize()
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         conn = sqlite3.connect(self.path, timeout=10)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA busy_timeout=10000")
-        return conn
+        try:
+            with conn:
+                yield conn
+        finally:
+            conn.close()
 
     def _initialize(self) -> None:
         with self._init_lock, self._connect() as conn:
@@ -57,6 +64,11 @@ class JobStore:
             columns = {row[1] for row in conn.execute("PRAGMA table_info(jobs)")}
             if "worker_id" not in columns:
                 conn.execute("ALTER TABLE jobs ADD COLUMN worker_id TEXT")
+            if "pc_attempted" not in columns:
+                conn.execute(
+                    "ALTER TABLE jobs ADD COLUMN pc_attempted INTEGER "
+                    "NOT NULL DEFAULT 0"
+                )
 
     def create(self, *, question: str, history: list[dict], k: int,
                model: str) -> dict:
@@ -93,12 +105,18 @@ class JobStore:
             )
         return self.get(job_id)
 
-    def claim_next(self, worker_id: str) -> dict | None:
-        """Atomically claim the oldest queued job for one worker."""
+    def claim_next(self, worker_id: str, *, worker_kind: str = "colab",
+                   pc_available: bool = False) -> dict | None:
+        """Claim work while preferring PC and preserving Colab fallback."""
+        condition = "status='queued'"
+        if worker_kind == "pc":
+            condition += " AND pc_attempted=0"
+        elif pc_available:
+            condition += " AND pc_attempted=1"
         with self._connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             row = conn.execute(
-                "SELECT id FROM jobs WHERE status='queued' "
+                f"SELECT id FROM jobs WHERE {condition} "
                 "ORDER BY created_at LIMIT 1"
             ).fetchone()
             if row is None:
@@ -111,6 +129,17 @@ class JobStore:
             )
             conn.commit()
         return self.get(row["id"])
+
+    def retry_on_colab(self, job_id: str, error: str) -> dict | None:
+        """Return a PC failure to the queue for a Colab worker."""
+        with self._connect() as conn:
+            conn.execute(
+                "UPDATE jobs SET status='queued', worker_id=NULL, "
+                "pc_attempted=1, error=?, updated_at=? "
+                "WHERE id=? AND status='running'",
+                (error[:2000], _now(), job_id),
+            )
+        return self.get(job_id)
 
     def complete(self, job_id: str, *, answer: str,
                  sources: list[dict]) -> dict | None:
@@ -131,13 +160,14 @@ class JobStore:
             )
         return self.get(job_id)
 
-    def requeue_worker(self, worker_id: str) -> int:
+    def requeue_worker(self, worker_id: str, *, pc_attempted: bool = False) -> int:
         """Return jobs held by a disconnected worker to the queue."""
         with self._connect() as conn:
             result = conn.execute(
-                "UPDATE jobs SET status='queued', worker_id=NULL, updated_at=? "
+                "UPDATE jobs SET status='queued', worker_id=NULL, "
+                "pc_attempted=MAX(pc_attempted, ?), updated_at=? "
                 "WHERE status='running' AND worker_id=?",
-                (_now(), worker_id),
+                (int(pc_attempted), _now(), worker_id),
             )
         return result.rowcount
 
