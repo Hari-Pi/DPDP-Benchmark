@@ -188,7 +188,10 @@ async def run() -> None:
 
 if __name__ == "__main__":
     print(f"[startup] worker_id={WORKER_ID} endpoint={COORDINATOR}", flush=True)
-    print("[startup] Synchronizing coordinator artifacts...", flush=True)
-    artifact_count = sync_artifacts()
-    print(f"[startup] Artifact sync complete ({artifact_count} files)", flush=True)
+    if os.environ.get("DPDP_SKIP_ARTIFACT_SYNC") == "1":
+        print("[startup] Artifact sync already completed by launcher", flush=True)
+    else:
+        print("[startup] Synchronizing coordinator artifacts...", flush=True)
+        artifact_count = sync_artifacts()
+        print(f"[startup] Artifact sync complete ({artifact_count} files)", flush=True)
     asyncio.run(run())

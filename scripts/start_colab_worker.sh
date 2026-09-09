@@ -45,6 +45,18 @@ export DPDP_WORKER_TOKEN
 
 "$PYTHON_BIN" -m pip install -q -r requirements.txt websockets requests
 
+# Restore the optional Droidian cache before Ollama starts. This avoids a full
+# re-ingest on fresh Colab runtimes and makes cached Ollama model files usable.
+# A missing/stale cache is deliberately non-fatal; the normal setup continues.
+cache_output="$($PYTHON_BIN scripts/restore_worker_cache.py 2>&1)" || true
+printf '%s\n' "$cache_output"
+cache_models="$(printf '%s\n' "$cache_output" | sed -n 's/^\[cache\] ollama_models=//p' | tail -n 1)"
+if [[ -n "$cache_models" ]]; then export OLLAMA_MODELS="$cache_models"; fi
+if [[ "$cache_output" == *"index=1"* ]]; then
+  export DPDP_SKIP_ARTIFACT_SYNC=1
+  export DPDP_SKIP_INGEST="${DPDP_SKIP_INGEST:-1}"
+fi
+
 # Tune parallel contexts to the accelerator visible in this runtime. Ollama's
 # memory use grows with parallelism × context length, so these profiles leave
 # headroom for the embedding model and GPU-resident retrieval matrix.

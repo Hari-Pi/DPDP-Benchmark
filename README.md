@@ -149,3 +149,17 @@ loading remain CPU/disk operations.
 - MEGA-RAG (public-health RAG w/ hallucination mitigation) — Frontiers in Public Health, 2025
 - Evaluating RAG Variants for Clinical QA — MDPI Electronics 14(21):4227, 2025
 - Hallucination Mitigation for RAG-based LLMs: A Review — MDPI Mathematics 13(5):856, 2025
+## Persistent worker cache
+
+After the PC worker has successfully ingested the corpus once, publish its
+vector index and Ollama model store to Droidian from PowerShell:
+
+```powershell
+.\scripts\publish_cache.ps1
+```
+
+The script copies the cache into the coordinator's read-only artifact volume.
+On the next Colab startup, `scripts/start_colab_worker.sh` downloads and
+verifies the cache before Ollama starts. A valid `chroma_db` cache skips the
+expensive fetch/extract/ingest stages; if the cache is missing or invalid,
+startup falls back to the normal setup automatically.
