@@ -51,14 +51,13 @@ async function checkAuth() {
   } catch (e) { /* offline — the status pill already shows it */ }
 }
 
-loginBtn.addEventListener('click', (e) => e.preventDefault());
-
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const username = loginUser.value.trim();
   const password = loginPass.value;
   if (!username || !password || loginBtn.disabled) return;
   loginBtn.disabled = true;
+  loginBtn.textContent = 'Signing in…';
   loginError.classList.add('hidden');
   loginRate.classList.add('hidden');
   try {
@@ -80,6 +79,7 @@ $('loginForm').addEventListener('submit', async (e) => {
     openLogin(false, 'Network error — is the server reachable?');
   } finally {
     loginBtn.disabled = false;
+    loginBtn.textContent = 'Sign in';
   }
 });
 
