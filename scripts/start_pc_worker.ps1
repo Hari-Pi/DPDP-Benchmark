@@ -36,7 +36,7 @@ if ($vramMiB -ge 32768) {
 }
 if (-not $env:DPDP_WORKER_CONCURRENCY) { $env:DPDP_WORKER_CONCURRENCY = "$parallel" }
 if (-not $env:DPDP_NUM_CTX) { $env:DPDP_NUM_CTX = "$context" }
-if (-not $env:DPDP_MAX_OUTPUT_TOKENS) { $env:DPDP_MAX_OUTPUT_TOKENS = "800" }
+if (-not $env:DPDP_MAX_OUTPUT_TOKENS) { $env:DPDP_MAX_OUTPUT_TOKENS = "2000" }
 if (-not $env:OLLAMA_NUM_PARALLEL) { $env:OLLAMA_NUM_PARALLEL = $env:DPDP_WORKER_CONCURRENCY }
 if (-not $env:OLLAMA_MAX_LOADED_MODELS) { $env:OLLAMA_MAX_LOADED_MODELS = "2" }
 if (-not $env:OLLAMA_MAX_QUEUE) { $env:OLLAMA_MAX_QUEUE = "64" }
