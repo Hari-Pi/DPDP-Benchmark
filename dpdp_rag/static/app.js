@@ -722,5 +722,5 @@ syncPlaceholder();
 autoGrow();
 qEl.focus();
 pingHealth();
-setInterval(pingHealth, 30000);
+setInterval(pingHealth, 5000);
 checkAuth();

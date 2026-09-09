@@ -20,8 +20,10 @@ $env:DPDP_WORKER_TOKEN = if ($env:DPDP_WORKER_TOKEN) {
 $gpuName = "none"
 $vramMiB = 0
 if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
-    $gpuName = ((& nvidia-smi --query-gpu=name --format=csv,noheader)[0]).Trim()
-    $vramMiB = [int](((& nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits)[0]).Trim())
+    $gpuNames = @(& nvidia-smi --query-gpu=name --format=csv,noheader)
+    $gpuMemory = @(& nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits)
+    $gpuName = $gpuNames[0].Trim()
+    $vramMiB = [int]$gpuMemory[0].Trim()
 }
 if ($vramMiB -ge 32768) {
     $parallel = 4; $context = 8192
@@ -47,6 +49,15 @@ Write-Host "GPU: $gpuName; VRAM=${vramMiB}MiB; workers=$env:DPDP_WORKER_CONCURRE
 $python = (Get-Command python -ErrorAction Stop).Source
 & $python -m pip install -q -r requirements.txt websockets requests
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+Write-Host "Checking the Droidian coordinator and worker credential..."
+$workerHeaders = @{ Authorization = "Bearer $env:DPDP_WORKER_TOKEN" }
+try {
+    Invoke-RestMethod https://dpdp.hari-pi.com/internal/worker/artifact-manifest -Headers $workerHeaders -TimeoutSec 15 | Out-Null
+    Write-Host "Coordinator preflight passed."
+} catch {
+    Write-Error "Cannot authenticate with the coordinator: $($_.Exception.Message)"
+}
 
 if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
     if (Get-Command winget -ErrorAction SilentlyContinue) {
@@ -91,3 +102,6 @@ if ($env:DPDP_SKIP_INGEST -ne "1") {
 
 Write-Host "Connecting this PC as the preferred worker for dpdp.hari-pi.com..."
 & $python -m dpdp_rag.worker
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "The PC worker stopped with exit code $LASTEXITCODE."
+}

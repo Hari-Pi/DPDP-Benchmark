@@ -119,8 +119,13 @@ bash scripts/start_pc_worker.sh
 On Windows, use:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\start_pc_worker.ps1
+powershell -ExecutionPolicy Bypass -File .\start.ps1
 ```
+
+This root launcher pulls the latest compatible code, verifies the coordinator
+and embedded worker credential, prepares Ollama/index data, and stays open with
+one `CONNECTED` line per registered PC worker slot. The website refreshes worker
+availability every five seconds.
 
 The coordinator always gives new requests to the PC while it is connected. If
 the PC disconnects or cannot answer a request, that request is automatically

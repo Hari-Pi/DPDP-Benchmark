@@ -104,7 +104,12 @@ async def run_slot(slot: int, query) -> None:
                 async for raw in socket:
                     message = json.loads(raw)
                     kind = message.get("type")
-                    if kind == "job":
+                    if kind == "ready":
+                        print(
+                            f"[worker:{slot + 1}] CONNECTED to {COORDINATOR} "
+                            f"as {WORKER_KIND}", flush=True,
+                        )
+                    elif kind == "job":
                         job = message["job"]
                         try:
                             result = await process_job(socket, job, query)
