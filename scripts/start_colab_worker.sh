@@ -44,6 +44,18 @@ export DPDP_WORKER_TOKEN
 
 "$PYTHON_BIN" -m pip install -q -r requirements.txt websockets requests
 
+# Ollama's Linux installer extracts a zstd-compressed archive. Fresh Colab
+# runtimes may not include the decoder, so install it before invoking Ollama.
+if ! command -v zstd >/dev/null 2>&1; then
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -qq
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq zstd
+  else
+    echo "zstd is required; install it with your system package manager." >&2
+    exit 1
+  fi
+fi
+
 if ! command -v ollama >/dev/null 2>&1; then
   curl -fsSL https://ollama.com/install.sh | sh
 fi

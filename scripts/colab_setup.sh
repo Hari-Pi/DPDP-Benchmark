@@ -19,6 +19,15 @@ python -m pip install -q -r requirements.txt
 
 # --- 2. Ollama ---------------------------------------------------------------
 log "[2/6] Ollama"
+if ! command -v zstd >/dev/null 2>&1; then
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -qq
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq zstd
+  else
+    echo "zstd is required; install it with your system package manager."
+    exit 1
+  fi
+fi
 if ! command -v ollama >/dev/null 2>&1; then
   curl -fsSL https://ollama.com/install.sh | sh
 else
