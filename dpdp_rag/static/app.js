@@ -588,7 +588,7 @@ async function submitQuestion(question, opts) {
     }
     const accepted = await res.json();
     if (!accepted.job_id) throw new Error('The coordinator did not return a job id.');
-    pendingStatus(pending, 'Waiting for a Colab worker…');
+    pendingStatus(pending, 'Waiting for a compute worker…');
     const data = await waitForJob(accepted.job_id, pending);
     pending.remove();
     addAssistantMessage(data.answer, data.sources, {
@@ -677,9 +677,21 @@ async function pingHealth() {
   try {
     const res = await fetch('/health', { cache: 'no-store' });
     if (!res.ok) throw new Error();
-    dot.className = 'inline-block size-1.5 rounded-full bg-success';
-    text.textContent = 'connected';
-    pill.setAttribute('data-tip', 'API reachable');
+    const health = await res.json();
+    const workers = Number(health.workers || 0);
+    const types = health.worker_types || {};
+    if (!workers) {
+      dot.className = 'inline-block size-1.5 rounded-full bg-warning';
+      text.textContent = 'no worker';
+      pill.setAttribute('data-tip', 'Site online; start the PC or Colab worker');
+    } else {
+      dot.className = 'inline-block size-1.5 rounded-full bg-success';
+      if (types.pc && types.colab) text.textContent = workers + ' worker slots';
+      else if (types.pc) text.textContent = 'PC ready';
+      else if (types.colab) text.textContent = 'Colab ready';
+      else text.textContent = workers + ' worker' + (workers === 1 ? '' : 's');
+      pill.setAttribute('data-tip', 'Coordinator and compute worker connected');
+    }
   } catch (e) {
     dot.className = 'inline-block size-1.5 rounded-full bg-error';
     text.textContent = 'offline';
