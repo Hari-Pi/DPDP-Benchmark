@@ -5,7 +5,50 @@
 - **Domain:** Gen AI / NLP / Legal Tech / Data Governance
 - **Team:** 4–5 B.E. final year students
 - **Compute:** Google Colab / Kaggle free tier sufficient
-- **Status:** Idea approved for detailing (2026-08-25)
+- **Status:** Working pipeline — live at [dpdp.hari-pi.com](https://dpdp.hari-pi.com); baseline results below
+
+---
+
+## Current results
+
+Baseline over the answerable question set in `benchmark_results.json`:
+
+![Retrieval and answer quality across the benchmark set](docs/benchmark.png)
+
+| Metric | Result |
+| --- | --- |
+| Correct clause retrieved | 100% (15/15) |
+| Answer factually correct | 93% (14/15) |
+| Cited the expected clause | 73% (11/15) |
+| Ungrounded citations | 1 |
+| Non-operative share of retrieved text | 34% mean |
+
+Retrieval is not the bottleneck. The expected clause is retrieved for every
+question and ranks first for 10 of the 15. The gap is citation discipline: the
+answer is usually right, but roughly a quarter of the time it does not cite the
+clause the answer rests on.
+
+Context quality looks like the lever. The four questions that missed the expected
+citation carry a mean 50% non-operative share, against 28% for the eleven that
+cited correctly — draft rules, FAQs and consultation summaries crowding out the
+operative provisions. Biasing retrieval toward operative law is the next thing
+to try.
+
+The one factual miss (`commencement-in-force-now`) does not fit that pattern: its
+retrieved context was 0% non-operative, so it needs a separate look.
+
+Abstention is unmeasured in this run, which contains no unanswerable cases.
+
+### Regenerating
+
+```sh
+pip install -r requirements-charts.txt
+python scripts/benchmark.py       # writes benchmark_results.json
+python scripts/report_charts.py   # writes docs/benchmark.png
+```
+
+`benchmark.py` re-runs every case from scratch unless `--resume` is passed, so a
+code change is never scored against stale output.
 
 ---
 

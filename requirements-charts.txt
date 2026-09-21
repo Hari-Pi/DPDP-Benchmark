@@ -1,0 +1,3 @@
+# Only needed for scripts/report_charts.py, not for running the service.
+pandas>=2.0
+matplotlib>=3.8
