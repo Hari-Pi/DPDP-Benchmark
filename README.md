@@ -1,6 +1,6 @@
 # DPDPA-Bench
 
-**First open benchmark & test bench for faithful RAG over Indian data-protection law — with a compliance-checker app: describe your business model, get flagged DPDPA violations with clause citations**
+**First open benchmark and evaluation harness for faithful RAG over Indian data-protection law — answers grounded in the DPDP Act with clause-level citations, scored for retrieval accuracy, citation correctness and abstention. A compliance checker that maps a plain-English business description onto applicable obligations is the next milestone.**
 
 - **Domain:** Gen AI / NLP / Legal Tech / Data Governance
 - **Developer:** Independent project, built and maintained solo after graduating
@@ -153,8 +153,7 @@ Next:
    three unanswerable ones, so abstention stops being a gap
 7. Grow the gold set from 21 cases toward the 150-300 target
 8. Build the compliance-checker path - a plain-English business description in,
-   applicable obligations out. Only `/ask` exists today, so the demo promised at
-   the top of this README is not yet real
+   applicable obligations out. Only `/ask` exists today
 9. Baseline across retrievers and LLMs rather than a single configuration
 10. Failure taxonomy and write-up
 
