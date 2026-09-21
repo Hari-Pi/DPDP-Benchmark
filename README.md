@@ -37,7 +37,9 @@ to try.
 The one factual miss (`commencement-in-force-now`) does not fit that pattern: its
 retrieved context was 0% non-operative, so it needs a separate look.
 
-Abstention is unmeasured in this run, which contains no unanswerable cases.
+Abstention is unmeasured here. Three unanswerable cases are authored in
+`scripts/benchmark.py` (`neg-gdpr-out-of-scope`, `neg-nonexistent-section`,
+`neg-no-enforcement-data`) but are not part of this committed run.
 
 ### Regenerating
 
@@ -102,11 +104,22 @@ The paper is the vehicle; the **artifacts** are the contribution:
 
 **Working title:** *"DPDPA-Bench: A Benchmark and Evaluation Harness for Faithful Legal Question Answering and Compliance Checking on India's Digital Personal Data Protection Act"*
 
-Benchmark/harness papers are citation magnets and are accepted from undergrad teams at:
-- FIRE (Forum for Information Retrieval Evaluation) — India-based, undergrad-friendly
-- IEEE conferences: CONECCT, ICCCNT, Pune Section conferences
-- Springer LNCS conference proceedings
-- MDPI / Frontiers AI journals (for an extended version)
+The corpus, the harness and a first baseline exist. Before a submission is
+honest, it still needs:
+
+- the gold set grown from the 21 authored cases toward the 150-300 target
+- abstention actually measured, not just authored
+- a comparison across retrievers and LLMs instead of one configuration
+- the compliance-checker path built and scored, since that is the part no
+  existing benchmark covers
+
+Candidate venues:
+
+- FIRE (Forum for Information Retrieval Evaluation) - India-based, IR and
+  benchmark focus
+- IEEE: CONECCT, ICCCNT, Pune Section conferences
+- Springer LNCS proceedings
+- MDPI / Frontiers AI journals for an extended version
 
 ## 6. Risks & mitigations
 
@@ -119,14 +132,31 @@ Benchmark/harness papers are citation magnets and are accepted from undergrad te
 | Scope creep (whole Indian legal system) | Strictly DPDPA 2023 + draft rules only; anything outside → abstain |
 | API costs for LLM baselines | Prefer open models (Llama 3.1 8B via Ollama, Gemma) + free tiers |
 
-## 7. Rough roadmap (idea level)
+## 7. Roadmap
 
-1. Corpus build + clause tagging (with obligation/actor metadata for compliance mapping)
-2. QA benchmark authoring + verification (incl. scenario/compliance gold set)
-3. Harness implementation (faithfulness/citation/abstention + violation-detection metrics)
-4. Compliance-checker pipeline (fact extraction → clause mapping → verdict + citation)
-5. Baseline runs (retrievers × LLMs, on QA set and scenario set)
-6. Analysis, failure taxonomy, paper writing
+Built:
+
+1. **Corpus and ingestion** - the Act, the 2025 Rules, the draft rules, official
+   FAQs and parliamentary Q&A, tracked in `data/sources_manifest.json`
+2. **Hybrid retrieval** - BM25 and dense scoring fused by a rank-based rerank
+   (`dpdp_rag/query.py`)
+3. **Answering service** - `/ask` behind authentication, with a durable job queue
+   and a coordinator/worker split so notebook compute stays outbound-only
+4. **Evaluation harness** - retrieval hit and rank, context noise, fact coverage,
+   expected-citation and ungrounded-citation checks, and abstention scoring
+5. **Baseline and report** - 15 answerable questions scored and charted, under
+   [Current results](#current-results)
+
+Next:
+
+6. Run the six authored cases missing from the committed results, including all
+   three unanswerable ones, so abstention stops being a gap
+7. Grow the gold set from 21 cases toward the 150-300 target
+8. Build the compliance-checker path - a plain-English business description in,
+   applicable obligations out. Only `/ask` exists today, so the demo promised at
+   the top of this README is not yet real
+9. Baseline across retrievers and LLMs rather than a single configuration
+10. Failure taxonomy and write-up
 
 ## Private Colab worker
 
