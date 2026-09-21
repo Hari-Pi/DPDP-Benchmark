@@ -5,7 +5,7 @@
 - **Domain:** Gen AI / NLP / Legal Tech / Data Governance
 - **Developer:** Independent project, built and maintained solo after graduating
 - **Compute:** Google Colab / Kaggle free tier sufficient
-- **Status:** Working pipeline — live at [dpdp.hari-pi.com](https://dpdp.hari-pi.com); baseline results below
+- **Status:** Working pipeline, with baseline results below. The demo at [dpdp.hari-pi.com](https://dpdp.hari-pi.com) is hosted on a self-hosted server and is not always reachable.
 
 ---
 
