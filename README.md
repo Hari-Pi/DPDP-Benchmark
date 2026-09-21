@@ -3,7 +3,7 @@
 **First open benchmark & test bench for faithful RAG over Indian data-protection law — with a compliance-checker app: describe your business model, get flagged DPDPA violations with clause citations**
 
 - **Domain:** Gen AI / NLP / Legal Tech / Data Governance
-- **Team:** 4–5 B.E. final year students
+- **Developer:** Sole developer (B.E. final year)
 - **Compute:** Google Colab / Kaggle free tier sufficient
 - **Status:** Working pipeline — live at [dpdp.hari-pi.com](https://dpdp.hari-pi.com); baseline results below
 
@@ -70,7 +70,7 @@ The practical gap founders actually face: they don't ask "what does Section 6 sa
 The paper is the vehicle; the **artifacts** are the contribution:
 
 1. **Clause-tagged DPDPA 2023 corpus** — the act split into sections/clauses with metadata (obligation type, actor: data fiduciary/processor, data-principal rights, penalties); optionally a DPDPA↔GDPR concept mapping table.
-2. **Gold QA benchmark (~150–300 questions)** — each with answer + verified clause-level citations. LLM-assisted generation, then human verification by the team (split across 4–5 members). Question types:
+2. **Gold QA benchmark (~150–300 questions)** — each with answer + verified clause-level citations. LLM-assisted generation, then human verification by hand. Question types:
    - **Factual** ("What is verifiable consent under Section 6?")
    - **Obligation** ("Must a fiduciary appoint a DPO?")
    - **Comparative** (DPDPA vs GDPR obligations)
@@ -96,7 +96,7 @@ The paper is the vehicle; the **artifacts** are the contribution:
 - DPDPA 2023 full text — India Code / MeitY / official gazette
 - DPDPA Rules draft (2025) — MeitY public consultation documents
 - GDPR text (for cross-law transfer experiments) — EUR-Lex
-- Synthetic QA generation via LLM, team-verified
+- Synthetic QA generation via LLM, hand-verified
 
 ## 5. Paper shape
 
