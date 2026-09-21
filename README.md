@@ -1,9 +1,9 @@
-# Project 1 — DPDPA-Bench
+# DPDPA-Bench
 
 **First open benchmark & test bench for faithful RAG over Indian data-protection law — with a compliance-checker app: describe your business model, get flagged DPDPA violations with clause citations**
 
 - **Domain:** Gen AI / NLP / Legal Tech / Data Governance
-- **Developer:** Sole developer (B.E. final year)
+- **Developer:** Independent project, built and maintained solo after graduating
 - **Compute:** Google Colab / Kaggle free tier sufficient
 - **Status:** Working pipeline — live at [dpdp.hari-pi.com](https://dpdp.hari-pi.com); baseline results below
 
