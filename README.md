@@ -128,10 +128,6 @@ Benchmark/harness papers are citation magnets and are accepted from undergrad te
 5. Baseline runs (retrievers × LLMs, on QA set and scenario set)
 6. Analysis, failure taxonomy, paper writing
 
-## 8. Averra alignment
-
-Maps onto Averra's **Data Governance** (DPDPA 2023 module) and **Data Science & AI with Gen AI** (LLMs, RAG) courses — reusable as an academy showcase project and demo.
-
 ## Private Colab worker
 
 The public UI and durable queue live at [dpdp.hari-pi.com](https://dpdp.hari-pi.com). Colab only supplies outbound LLM/RAG compute, so it does not need ngrok, an inbound port, or a stable Colab URL. If Colab disconnects, the site stays online and queued work waits for the next worker.
@@ -185,7 +181,7 @@ use three or four. Override detection with `DPDP_WORKER_CONCURRENCY` and
 cached on CUDA or Metal after their first use; HTTP/JSON, BM25, and initial
 loading remain CPU/disk operations.
 
-## 9. Validating references (collected 2026-08-25)
+## 8. Validating references (collected 2026-08-25)
 
 - RAGAS: Automated Evaluation of RAG — arXiv:2309.15217
 - Real-Time Evaluation Models for RAG (hallucination detection benchmark) — arXiv:2503.21157
