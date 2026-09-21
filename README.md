@@ -69,29 +69,44 @@ The practical gap founders actually face: they don't ask "what does Section 6 sa
 
 ## 3. The contribution (the real deliverable)
 
-The paper is the vehicle; the **artifacts** are the contribution:
+The paper is the vehicle; the **artifacts** are the contribution. Each is marked
+with where it actually stands today:
 
-1. **Clause-tagged DPDPA 2023 corpus** — the act split into sections/clauses with metadata (obligation type, actor: data fiduciary/processor, data-principal rights, penalties); optionally a DPDPA↔GDPR concept mapping table.
-2. **Gold QA benchmark (~150–300 questions)** — each with answer + verified clause-level citations. LLM-assisted generation, then human verification by hand. Question types:
-   - **Factual** ("What is verifiable consent under Section 6?")
-   - **Obligation** ("Must a fiduciary appoint a DPO?")
-   - **Comparative** (DPDPA vs GDPR obligations)
-   - **Unanswerable/adversarial** (to test abstention)
-   - **Scenario/compliance** (new): a business-model description ("EdTech app tracking children without parental consent") → gold set of applicable clauses / violations / or "no violation / not determinable from the act"
-3. **Compliance-checker application (the flagship demo)** — user describes their business model or idea in plain English; the RAG pipeline:
-   - Extracts data-flow facts (what personal data, whose, purpose, consent, sharing, retention, cross-border)
-   - Retrieves and maps relevant DPDPA clauses to each fact
-   - Reports **compliant / potential violation / not covered by the act** per issue, each with the exact clause citation
-   - **Abstains** when the description lacks enough detail or the issue falls outside DPDPA's scope (e.g., labor law, GDPR-only obligations)
-   - Ships with a prominent **"research prototype, not legal advice"** disclaimer
-4. **Open-source evaluation harness** measuring:
-   - Faithfulness (answer supported by retrieved context)
-   - Citation accuracy (does the cited clause actually support the claim?)
-   - Hallucination rate
+1. **Clause-tagged DPDPA corpus** — *partly built.* The Act and the 2025 Rules are
+   ingested from 12 tracked sources and chunked into citable units (`s. 8`,
+   `r. 6`), which is what makes clause-level citation and scoring possible. The
+   richer per-clause metadata (obligation type, actor, data-principal rights,
+   penalties) and the optional DPDPA↔GDPR concept mapping are **not built**.
+2. **Gold QA benchmark (~150–300 questions)** — *partly built.* 21 cases are
+   authored and verified by hand, covering:
+   - **Factual** ("What is verifiable consent under Section 6?") — present
+   - **Obligation** ("Must a fiduciary appoint a DPO?") — present
+   - **Unanswerable/adversarial** (to test abstention) — three authored
+   - **Comparative** (DPDPA vs GDPR obligations) — not yet authored
+   - **Scenario/compliance**: a business-model description ("EdTech app tracking
+     children without parental consent") → applicable clauses / violations / "not
+     determinable from the act" — not yet authored
+3. **Compliance-checker application** — *not built.* The intended design: the user
+   describes their business model in plain English; the pipeline extracts
+   data-flow facts (what personal data, whose, purpose, consent, sharing,
+   retention, cross-border), maps clauses to each fact, reports **compliant /
+   potential violation / not covered by the act** with the exact citation,
+   abstains when the description is too thin or falls outside DPDPA's scope, and
+   ships behind a **"research prototype, not legal advice"** disclaimer. Today the
+   service exposes question answering only (`/ask`).
+4. **Open-source evaluation harness** — *built,* for the question-answering path:
+   - Fact coverage (is the answer supported by the corpus?)
+   - Citation accuracy (does it cite the clause the answer rests on?)
+   - Ungrounded citations (clauses cited that do not support the claim)
    - Abstention quality (correct refusal on unanswerable questions)
-   - **Violation-detection metrics (for the compliance checker):** precision/recall on flagged clauses, false-positive rate (flagging compliant practices as violations), false-negative rate (missing real violations), and correct-abstention rate on out-of-scope scenarios
-   - Standard RAGAS metrics (context precision/recall, answer relevancy)
-5. **Baseline results table** — BM25 vs dense vs hybrid retrieval × several LLMs (open + API), on both the QA set and the scenario-compliance set. Future work compares against these numbers.
+   - Context noise (share of retrieved passages that are not operative law)
+
+   **Not built:** violation-detection metrics (they need artifact 3) and the
+   standard RAGAS metrics.
+5. **Baseline results table** — *partly built.* One configuration is scored over 15
+   questions and charted under [Current results](#current-results). The full sweep
+   — BM25 vs dense vs hybrid × several LLMs, on both the QA set and the scenario
+   set — has not been run.
 
 ## 4. Data sources (all public)
 
